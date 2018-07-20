@@ -16,7 +16,8 @@ class CreateVocabularyTable extends Migration
         Schema::create('vocabularies', function (Blueprint $table) {
             $table->increments('id');
             $table->string('vocabulary')->comment('單字');
-            $table->decimal('easiest_factor')->comment('單字簡易程度');
+            $table->string('answer')->comment('中文解釋');
+            $table->decimal('easiest_factor', 12, 3)->comment('單字簡易程度');
             $table->timestamps();
         });
     }
