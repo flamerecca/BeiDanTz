@@ -23,8 +23,14 @@ class RepositoryServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bind(\App\Repositories\VocabularyRepository::class, \App\Repositories\VocabularyRepositoryEloquent::class);
-        $this->app->bind(\App\Repositories\TelegramUserRepository::class, \App\Repositories\TelegramUserRepositoryEloquent::class);
+        $this->app->bind(
+            \App\Repositories\VocabularyRepository::class,
+            \App\Repositories\VocabularyRepositoryEloquent::class
+        );
+        $this->app->bind(
+            \App\Repositories\TelegramUserRepository::class,
+            \App\Repositories\TelegramUserRepositoryEloquent::class
+        );
         //:end-bindings:
     }
 }
