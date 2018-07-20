@@ -23,7 +23,7 @@ class QuestionDTO
     /**
      * @var 題目選項，為字串的陣列
      */
-    public $option;
+    public $options;
 
     /**
      * @var 解答，為選項 index
