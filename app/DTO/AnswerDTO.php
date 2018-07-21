@@ -16,17 +16,48 @@ namespace App\DTO;
 class AnswerDTO
 {
     /**
-     * @var 回答的用戶 ID
+     * @var int 回答的用戶 ID
      */
-    public $userId;
+    private $userId;
 
     /**
-     * @var 回答的單字 ID
+     * @var int 回答的單字 ID
      */
-    public $vocabularyID;
+    private $vocabularyId;
 
     /**
-     * @var 回答狀況，應為 0-5 之整數
+     * @var int 回答狀況，應為 0-5 之整數
      */
-    public $answeringStatus;
+    private $answeringStatus;
+
+    public function __construct(int $userId, int $vocabularyID, int $status)
+    {
+        $this->userId = $userId;
+        $this->vocabularyID = $vocabularyID;
+        $this->answeringStatus = $status;
+    }
+
+    /**
+     * @return int
+     */
+    public function getUserId(): int
+    {
+        return $this->userId;
+    }
+
+    /**
+     * @return int
+     */
+    public function getVocabularyId(): int
+    {
+        return $this->vocabularyId;
+    }
+
+    /**
+     * @return int
+     */
+    public function getAnsweringStatus(): int
+    {
+        return $this->answeringStatus;
+    }
 }
