@@ -25,7 +25,7 @@ class TestService implements TestServiceInterface
     /**
      * @param AnswerDTO $answerDTO
      */
-    public function setAnswer(AnswerDTO $answerDTO): void
+    public function answer(AnswerDTO $answerDTO): void
     {
     }
 }
