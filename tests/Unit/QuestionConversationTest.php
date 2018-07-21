@@ -89,15 +89,22 @@ class QuestionConversationTest extends TestCase
         $this->bot->setUser(['id' => $this->userId]);
     }
 
+    private function mockGetQuestionReturn(array $questions)
+    {
+        foreach ($questions as $question) {
+            $this->testServiceMock
+                ->shouldReceive('getQuestion')
+                ->once()
+                ->andReturn($question);
+        }
+    }
+
     /**
      * @test
      */
     public function 測試能夠取得正確的問題樣板()
     {
-        $this->testServiceMock
-            ->shouldReceive('getQuestion')
-            ->once()
-            ->andReturn($this->questionDTO1);
+        $this->mockGetQuestionReturn([$this->questionDTO1]);
 
         $this->bot
             ->receives('開始複習')
@@ -109,14 +116,7 @@ class QuestionConversationTest extends TestCase
      */
     public function 測試回答正確時會進入下一題()
     {
-        $this->testServiceMock
-            ->shouldReceive('getQuestion')
-            ->once()
-            ->andReturn($this->questionDTO1);
-        $this->testServiceMock
-            ->shouldReceive('getQuestion')
-            ->once()
-            ->andReturn($this->questionDTO2);
+        $this->mockGetQuestionReturn([$this->questionDTO1, $this->questionDTO2]);
 
         $this->bot
             ->receives('開始複習')
@@ -130,10 +130,7 @@ class QuestionConversationTest extends TestCase
      */
     public function 測試回答錯誤時可以重複回答問題()
     {
-        $this->testServiceMock
-            ->shouldReceive('getQuestion')
-            ->once()
-            ->andReturn($this->questionDTO1);
+        $this->mockGetQuestionReturn([$this->questionDTO1]);
 
         $this->bot
             ->receives('開始複習')
@@ -147,14 +144,7 @@ class QuestionConversationTest extends TestCase
      */
     public function 測試再次回答錯誤後詢問新問題()
     {
-        $this->testServiceMock
-            ->shouldReceive('getQuestion')
-            ->once()
-            ->andReturn($this->questionDTO1);
-        $this->testServiceMock
-            ->shouldReceive('getQuestion')
-            ->once()
-            ->andReturn($this->questionDTO2);
+        $this->mockGetQuestionReturn([$this->questionDTO1, $this->questionDTO2]);
 
         $this->bot
             ->receives('開始複習')
@@ -170,14 +160,7 @@ class QuestionConversationTest extends TestCase
      */
     public function 測試收到pass則直接詢問新問題，並且service會收到pass的通知()
     {
-        $this->testServiceMock
-            ->shouldReceive('getQuestion')
-            ->once()
-            ->andReturn($this->questionDTO1);
-        $this->testServiceMock
-            ->shouldReceive('getQuestion')
-            ->once()
-            ->andReturn($this->questionDTO2);
+        $this->mockGetQuestionReturn([$this->questionDTO1, $this->questionDTO2]);
         $this->testServiceMock
             ->shouldReceive('answer')
             ->with(Mockery::on(function (AnswerDTO $answer) {
