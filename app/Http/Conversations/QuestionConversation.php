@@ -65,7 +65,8 @@ class QuestionConversation extends Conversation
         $startAskingTime = microtime(true);
         $this->ask($questionTemplate, function (Answer $answer) use ($questionTemplate, $chance, $startAskingTime) {
             if ($answer->isInteractiveMessageReply()) {
-                $answerTime = microtime(true) - $startAskingTime;
+                // change microtime to millisecond
+                $answerTime = (microtime(true) - $startAskingTime) * 1000;
                 $v = $answer->getValue();
                 $correct = $v === $this->question->getAnswer();
                 $firstAnswer = $chance === $this->maxChance;
@@ -77,9 +78,13 @@ class QuestionConversation extends Conversation
                 if ($correct || !$firstAnswer || $pass) {
                     if ($pass) {
                         $status = AnswerDTO::PASS;
-                    } else if ($correctAtOnce) {
-                        if ($answerTime < config('botman.config.answer_min_time')) {
+                    } elseif ($correctAtOnce) {
+                        $min = config('botman.config.answer_min_time');
+                        $max = config('botman.config.answer_max_time');
+                        if ($answerTime < $min) {
                             $status = AnswerDTO::CORRECT_LESS_MIN_TIME;
+                        } elseif ($answerTime >= $min && $answerTime < $max) {
+                            $status = AnswerDTO::CORRECT_BETWEEN_MIN_MAX_TIME;
                         }
                     }
 
