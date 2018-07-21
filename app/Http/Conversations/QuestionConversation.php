@@ -72,6 +72,14 @@ class QuestionConversation extends Conversation
                 $pass = $v === 'pass';
 
                 if ($correct || ($answerWrong && !$answerWrongOnce) || $pass) {
+                    if ($pass) {
+                        $dto = new AnswerDTO(
+                            $this->bot->getUser()->getId(),
+                            $this->question->getVocabulary()->id,
+                            AnswerDTO::PASS
+                        );
+                        $this->testService->answer($dto);
+                    }
                     $service = app()->make(TestService::class);
                     $this->bot->startConversation(new QuestionConversation($service));
                 } else {

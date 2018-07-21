@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\DTO\AnswerDTO;
 use App\DTO\QuestionDTO;
 use App\Entities\Vocabulary;
 use App\Services\TestService;
@@ -37,9 +38,14 @@ class QuestionConversationTest extends TestCase
     private $questionTemplate2;
 
     /**
-     * @ver Mock
+     * @ver Mockery\MockInterface
      */
     private $testServiceMock;
+
+    /**
+     * @var int
+     */
+    private $userId = 1;
 
     public function setUp()
     {
@@ -48,17 +54,17 @@ class QuestionConversationTest extends TestCase
         $this->app->instance(TestService::class, $this->testServiceMock);
 
         $v1 = new Vocabulary([
-            'id' => 1,
             'content' => 'test',
             'answer' => '測試',
             'easiest_factor' => 2.5,
         ]);
+        $v1->id = 1;
         $v2 = new Vocabulary([
-            'id' => 2,
             'content' => 'question',
             'answer' => '問題',
             'easiest_factor' => 2.5,
         ]);
+        $v2->id = 2;
         $this->questionDTO1 = new QuestionDTO($v1, ['測試', '任務', '答案', '回應'], 0);
         $this->questionDTO2 = new QuestionDTO($v2, ['任務', '問題', '答案', '回應'], 1);
 
@@ -79,6 +85,8 @@ class QuestionConversationTest extends TestCase
                 Button::create('回應')->value(3),
                 Button::create('pass')->value('pass'),
             ]);
+
+        $this->bot->setUser(['id' => $this->userId]);
     }
 
     /**
@@ -160,7 +168,7 @@ class QuestionConversationTest extends TestCase
     /**
      * @test
      */
-    public function 測試收到pass則直接詢問新問題()
+    public function 測試收到pass則直接詢問新問題，並且service會收到pass的通知()
     {
         $this->testServiceMock
             ->shouldReceive('getQuestion')
@@ -170,6 +178,16 @@ class QuestionConversationTest extends TestCase
             ->shouldReceive('getQuestion')
             ->once()
             ->andReturn($this->questionDTO2);
+        $this->testServiceMock
+            ->shouldReceive('answer')
+            ->with(Mockery::on(function (AnswerDTO $answer) {
+                $dto = new AnswerDTO(
+                    $this->userId,
+                    $this->questionDTO1->getVocabulary()->id,
+                    AnswerDTO::PASS
+                );
+                return $answer == $dto;
+            }));
 
         $this->bot
             ->receives('開始複習')
