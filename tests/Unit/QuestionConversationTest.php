@@ -124,9 +124,14 @@ class QuestionConversationTest extends TestCase
     /**
      * @test
      */
-    public function 測試回答正確時會進入下一題()
+    public function 測試在最短時間內回答正確時會進入下一題，並且service會收到最短時間內回答的通知()
     {
         $this->mockGetQuestionReturn([$this->questionDTO1, $this->questionDTO2]);
+        $this->shouldReceiveAnswer(new AnswerDTO(
+            $this->userId,
+            $this->questionDTO1->getVocabulary()->id,
+            AnswerDTO::CORRECT_LESS_MIN_TIME
+        ));
 
         $this->bot
             ->receives('開始複習')

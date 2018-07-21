@@ -62,21 +62,32 @@ class QuestionConversation extends Conversation
 
     private function askQuestion(Question $questionTemplate, int $chance)
     {
-        $this->ask($questionTemplate, function (Answer $answer) use ($questionTemplate, $chance) {
+        $startAskingTime = microtime(true);
+        $this->ask($questionTemplate, function (Answer $answer) use ($questionTemplate, $chance, $startAskingTime) {
             if ($answer->isInteractiveMessageReply()) {
+                $answerTime = microtime(true) - $startAskingTime;
                 $v = $answer->getValue();
                 $correct = $v === $this->question->getAnswer();
-                $correctAtOnce = $correct && $chance === $this->maxChance;
-                $answerWrong = $v !== $this->question->getAnswer();
-                $answerWrongOnce = $answerWrong && $chance === $this->maxChance;
+                $firstAnswer = $chance === $this->maxChance;
+                $correctAtOnce = $correct && $firstAnswer;
+                $answerWrong = !$correct;
+                $answerWrongOnce = $correct && !$firstAnswer;
                 $pass = $v === 'pass';
 
-                if ($correct || ($answerWrong && !$answerWrongOnce) || $pass) {
+                if ($correct || !$firstAnswer || $pass) {
                     if ($pass) {
+                        $status = AnswerDTO::PASS;
+                    } else if ($correctAtOnce) {
+                        if ($answerTime < config('botman.config.answer_min_time')) {
+                            $status = AnswerDTO::CORRECT_LESS_MIN_TIME;
+                        }
+                    }
+
+                    if ($pass || $correctAtOnce) {
                         $dto = new AnswerDTO(
                             $this->bot->getUser()->getId(),
                             $this->question->getVocabulary()->id,
-                            AnswerDTO::PASS
+                            $status
                         );
                         $this->testService->answer($dto);
                     }
