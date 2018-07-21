@@ -99,4 +99,18 @@ class QuestionConversationTest extends TestCase
             ->receivesInteractiveMessage($this->questionDTO1->getAnswer() + 1)
             ->assertTemplate($this->questionTemplate1, true);
     }
+
+    /**
+     * @test
+     */
+    public function 測試再次回答錯誤後詢問新問題()
+    {
+        $this->bot
+            ->receives('開始複習')
+            ->assertTemplate($this->questionTemplate1, true)
+            ->receivesInteractiveMessage($this->questionDTO1->getAnswer() + 1)
+            ->assertTemplate($this->questionTemplate1, true)
+            ->receivesInteractiveMessage($this->questionDTO1->getAnswer() + 1)
+            ->assertTemplate($this->questionTemplate2, true);
+    }
 }
