@@ -26,6 +26,11 @@ class QuestionConversation extends Conversation
      */
     private $question;
 
+    /**
+     * @var int
+     */
+    private $maxChance = 1;
+
     public function __construct(TestServiceInterface $testService)
     {
         $this->testService = $testService;
@@ -51,7 +56,7 @@ class QuestionConversation extends Conversation
         $vocabulary = $this->question->getVocabulary();
         $questionTemplate = Question::create($vocabulary->content)->addButtons($buttons);
 
-        return $this->askQuestion($questionTemplate, 1);
+        return $this->askQuestion($questionTemplate, $this->maxChance);
     }
 
     private function askQuestion(Question $questionTemplate, int $chance)
@@ -59,16 +64,16 @@ class QuestionConversation extends Conversation
         $this->ask($questionTemplate, function (Answer $answer) use ($questionTemplate, $chance) {
             if ($answer->isInteractiveMessageReply()) {
                 $v = $answer->getValue();
-                if ($v === $this->question->getAnswer()) {
+                $correct = $v === $this->question->getAnswer();
+                $correctAtOnce = $correct && $chance === $this->maxChance;
+                $answerWrong = $v !== $this->question->getAnswer();
+                $answerWrongOnce = $answerWrong && $chance === $this->maxChance;
+                $pass = $v === 'pass';
+
+                if ($correct || ($answerWrong && !$answerWrongOnce) || $pass) {
                     $this->bot->startConversation(new QuestionConversation($this->testService));
-                } else if ($v === 0) {
-                    if ($chance > 0) {
-                        $this->askQuestion($questionTemplate, $chance - 1);
-                    } else {
-                        $this->bot->startConversation(new QuestionConversation($this->testService));
-                    }
-                } else if ($v === 'pass') {
-                    $this->bot->startConversation(new QuestionConversation($this->testService));
+                } else {
+                    $this->askQuestion($questionTemplate, $chance - 1);
                 }
             }
         });
