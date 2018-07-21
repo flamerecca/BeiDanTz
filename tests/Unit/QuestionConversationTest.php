@@ -143,6 +143,24 @@ class QuestionConversationTest extends TestCase
     /**
      * @test
      */
+    public function 測試在介於最短時間跟最長時限內回答正確時，service會收到介於時限內回答的通知()
+    {
+        $this->mockGetQuestionReturn([$this->questionDTO1, $this->questionDTO2]);
+        $this->shouldReceiveAnswer(new AnswerDTO(
+            $this->userId,
+            $this->questionDTO1->getVocabulary()->id,
+            AnswerDTO::CORRECT_BETWEEN_MIN_MAX_TIME
+        ));
+
+        $this->bot->receives('開始複習');
+        $wait = (config('botman.config.answer_min_time') + config('botman.config.answer_max_time')) / 2;
+        usleep($wait * 1000);
+        $this->bot->receivesInteractiveMessage($this->questionDTO1->getAnswer());
+    }
+
+    /**
+     * @test
+     */
     public function 測試回答錯誤時可以重複回答問題()
     {
         $this->mockGetQuestionReturn([$this->questionDTO1]);
