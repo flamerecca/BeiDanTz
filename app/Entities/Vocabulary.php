@@ -21,7 +21,7 @@ class Vocabulary extends Model implements Transformable
      * @var array
      */
     protected $fillable = [
-        'vocabulary',
+        'content',
         'answer',
         'easiest_factor',
     ];
