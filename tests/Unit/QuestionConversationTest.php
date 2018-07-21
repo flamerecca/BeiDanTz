@@ -9,12 +9,23 @@ use App\Services\TestServiceInterface;
 use BotMan\BotMan\Messages\Incoming\Answer;
 use BotMan\BotMan\Messages\Outgoing\Actions\Button;
 use BotMan\BotMan\Messages\Outgoing\Question;
+use Mockery;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class QuestionConversationTest extends TestCase
 {
+    /**
+     * @var QuestionDTO
+     */
+    private $questionDTO1;
+
+    /**
+     * @var QuestionDTO
+     */
+    private $questionDTO2;
+
     /**
      * @var Question
      */
@@ -25,10 +36,17 @@ class QuestionConversationTest extends TestCase
      */
     private $questionTemplate2;
 
+    /**
+     * @ver Mock
+     */
+    private $testServiceMock;
+
     public function setUp()
     {
         parent::setUp();
-        $mock = $this->createMock(TestServiceInterface::class);
+        $this->testServiceMock = Mockery::mock(TestServiceInterface::class);
+        $this->app->instance(TestService::class, $this->testServiceMock);
+
         $v1 = new Vocabulary([
             'id' => 1,
             'content' => 'test',
@@ -41,11 +59,8 @@ class QuestionConversationTest extends TestCase
             'answer' => '問題',
             'easiest_factor' => 2.5,
         ]);
-        $q1 = new QuestionDTO($v1, ['測試', '任務', '答案', '回應'], 0);
-        $q2 = new QuestionDTO($v2, ['任務', '問題', '答案', '回應'], 1);
-        $mock->method('getQuestion')
-            ->willReturnOnConsecutiveCalls($q1, $q2);
-        $this->app->instance(TestService::class, $mock);
+        $this->questionDTO1 = new QuestionDTO($v1, ['測試', '任務', '答案', '回應'], 0);
+        $this->questionDTO2 = new QuestionDTO($v2, ['任務', '問題', '答案', '回應'], 1);
 
         $this->questionTemplate1 = Question::create('test')
             ->addButtons([
@@ -71,6 +86,11 @@ class QuestionConversationTest extends TestCase
      */
     public function 測試能夠取得正確的問題樣板()
     {
+        $this->testServiceMock
+            ->shouldReceive('getQuestion')
+            ->once()
+            ->andReturn($this->questionDTO1);
+
         $this->bot
             ->receives('開始複習')
             ->assertTemplate($this->questionTemplate1, true);
@@ -81,6 +101,15 @@ class QuestionConversationTest extends TestCase
      */
     public function 測試回答正確時會進入下一題()
     {
+        $this->testServiceMock
+            ->shouldReceive('getQuestion')
+            ->once()
+            ->andReturn($this->questionDTO1);
+        $this->testServiceMock
+            ->shouldReceive('getQuestion')
+            ->once()
+            ->andReturn($this->questionDTO2);
+
         $this->bot
             ->receives('開始複習')
             ->assertTemplate($this->questionTemplate1, true)
@@ -93,6 +122,11 @@ class QuestionConversationTest extends TestCase
      */
     public function 測試回答錯誤時可以重複回答問題()
     {
+        $this->testServiceMock
+            ->shouldReceive('getQuestion')
+            ->once()
+            ->andReturn($this->questionDTO1);
+
         $this->bot
             ->receives('開始複習')
             ->assertTemplate($this->questionTemplate1, true)
@@ -105,6 +139,15 @@ class QuestionConversationTest extends TestCase
      */
     public function 測試再次回答錯誤後詢問新問題()
     {
+        $this->testServiceMock
+            ->shouldReceive('getQuestion')
+            ->once()
+            ->andReturn($this->questionDTO1);
+        $this->testServiceMock
+            ->shouldReceive('getQuestion')
+            ->once()
+            ->andReturn($this->questionDTO2);
+
         $this->bot
             ->receives('開始複習')
             ->assertTemplate($this->questionTemplate1, true)
@@ -119,6 +162,15 @@ class QuestionConversationTest extends TestCase
      */
     public function 測試收到pass則直接詢問新問題()
     {
+        $this->testServiceMock
+            ->shouldReceive('getQuestion')
+            ->once()
+            ->andReturn($this->questionDTO1);
+        $this->testServiceMock
+            ->shouldReceive('getQuestion')
+            ->once()
+            ->andReturn($this->questionDTO2);
+
         $this->bot
             ->receives('開始複習')
             ->assertTemplate($this->questionTemplate1, true)
