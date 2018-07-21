@@ -11,6 +11,7 @@ use BotMan\BotMan\Messages\Incoming\Answer;
 use BotMan\BotMan\Messages\Outgoing\Actions\Button;
 use BotMan\BotMan\Messages\Outgoing\Question;
 use Doctrine\DBAL\Types\ConversionException;
+use Illuminate\Support\Facades\Log;
 
 class QuestionConversation extends Conversation
 {
@@ -41,6 +42,7 @@ class QuestionConversation extends Conversation
         $options = $this->question->getOptions();
         $buttons = collect($options)
             ->map(function ($option, $idx) {
+                // each button value must be difference, otherwise telegram can't display template
                 return Button::create($option)->value($idx);
             })
             ->push(Button::create('pass')->value('pass'))
@@ -50,6 +52,12 @@ class QuestionConversation extends Conversation
         $questionTemplate = Question::create($vocabulary->content)->addButtons($buttons);
 
         return $this->ask($questionTemplate, function (Answer $answer) {
+            if ($answer->isInteractiveMessageReply()) {
+                $v = $answer->getValue();
+                if ($v === $this->question->getAnswer()) {
+                    $this->bot->startConversation(new QuestionConversation($this->testService));
+                }
+            }
         });
     }
 }
