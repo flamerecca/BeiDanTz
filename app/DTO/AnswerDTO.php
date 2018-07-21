@@ -31,6 +31,13 @@ class AnswerDTO
      */
     private $answeringStatus;
 
+    const PASS = 0;
+    const WRONG_TWICE = 1;
+    const WRONG_ONCE = 2;
+    const CORRECT_OVER_30S = 3;
+    const CORRECT_BETWEEN_5_30S = 4;
+    const CORRECT_LESS_5S = 5;
+
     public function __construct(int $userId, int $vocabularyId, int $status)
     {
         $this->userId = $userId;
