@@ -67,6 +67,8 @@ class QuestionConversation extends Conversation
                     } else {
                         $this->bot->startConversation(new QuestionConversation($this->testService));
                     }
+                } else if ($v === 'pass') {
+                    $this->bot->startConversation(new QuestionConversation($this->testService));
                 }
             }
         });
