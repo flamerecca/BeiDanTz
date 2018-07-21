@@ -99,6 +99,16 @@ class QuestionConversationTest extends TestCase
         }
     }
 
+    private function shouldReceiveAnswer(AnswerDTO $answer)
+    {
+        $this->testServiceMock
+            ->shouldReceive('answer')
+            ->once()
+            ->with(Mockery::on(function (AnswerDTO $ans) use ($answer) {
+                return $ans == $answer;
+            }));
+    }
+
     /**
      * @test
      */
@@ -161,16 +171,11 @@ class QuestionConversationTest extends TestCase
     public function 測試收到pass則直接詢問新問題，並且service會收到pass的通知()
     {
         $this->mockGetQuestionReturn([$this->questionDTO1, $this->questionDTO2]);
-        $this->testServiceMock
-            ->shouldReceive('answer')
-            ->with(Mockery::on(function (AnswerDTO $answer) {
-                $dto = new AnswerDTO(
-                    $this->userId,
-                    $this->questionDTO1->getVocabulary()->id,
-                    AnswerDTO::PASS
-                );
-                return $answer == $dto;
-            }));
+        $this->shouldReceiveAnswer(new AnswerDTO(
+            $this->userId,
+            $this->questionDTO1->getVocabulary()->id,
+            AnswerDTO::PASS
+        ));
 
         $this->bot
             ->receives('開始複習')
