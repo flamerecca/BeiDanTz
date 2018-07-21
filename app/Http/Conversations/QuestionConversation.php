@@ -51,18 +51,22 @@ class QuestionConversation extends Conversation
         $vocabulary = $this->question->getVocabulary();
         $questionTemplate = Question::create($vocabulary->content)->addButtons($buttons);
 
-        return $this->askQuestion($questionTemplate);
+        return $this->askQuestion($questionTemplate, 1);
     }
 
-    private function askQuestion(Question $questionTemplate)
+    private function askQuestion(Question $questionTemplate, int $chance)
     {
-        $this->ask($questionTemplate, function (Answer $answer) use ($questionTemplate) {
+        $this->ask($questionTemplate, function (Answer $answer) use ($questionTemplate, $chance) {
             if ($answer->isInteractiveMessageReply()) {
                 $v = $answer->getValue();
                 if ($v === $this->question->getAnswer()) {
                     $this->bot->startConversation(new QuestionConversation($this->testService));
                 } else if ($v === 0) {
-                    $this->askQuestion($questionTemplate);
+                    if ($chance > 0) {
+                        $this->askQuestion($questionTemplate, $chance - 1);
+                    } else {
+                        $this->bot->startConversation(new QuestionConversation($this->testService));
+                    }
                 }
             }
         });
