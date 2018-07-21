@@ -85,6 +85,8 @@ class QuestionConversation extends Conversation
                             $status = AnswerDTO::CORRECT_LESS_MIN_TIME;
                         } elseif ($answerTime >= $min && $answerTime < $max) {
                             $status = AnswerDTO::CORRECT_BETWEEN_MIN_MAX_TIME;
+                        } else {
+                            $status = AnswerDTO::CORRECT_OVER_MAX_TIME;
                         }
                     }
 
