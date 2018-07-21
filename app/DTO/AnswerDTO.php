@@ -34,9 +34,9 @@ class AnswerDTO
     const PASS = 0;
     const WRONG_TWICE = 1;
     const WRONG_ONCE = 2;
-    const CORRECT_OVER_30S = 3;
-    const CORRECT_BETWEEN_5_30S = 4;
-    const CORRECT_LESS_5S = 5;
+    const CORRECT_OVER_MAX_TIME = 3;
+    const CORRECT_BETWEEN_MIN_MAX_TIME = 4;
+    const CORRECT_LESS_MIN_TIME = 5;
 
     public function __construct(int $userId, int $vocabularyId, int $status)
     {
