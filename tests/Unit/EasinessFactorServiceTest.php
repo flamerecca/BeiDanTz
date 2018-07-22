@@ -14,16 +14,10 @@ use Tests\TestCase;
 class EasinessFactorServiceTest extends TestCase
 {
     private $easinessFactorService;
-    /**
-     * EasinessFactorServiceTest constructor.
-     * @param null|string $name
-     * @param array $data
-     * @param string $dataName
-     */
-    public function __construct(?string $name = null, array $data = [], string $dataName = '')
+
+    protected function setUp()
     {
         $this->easinessFactorService = new EasinessFactorService();
-        parent::__construct($name, $data, $dataName);
     }
 
     public function testNewEasinessFactorIsCorrect(): void
@@ -67,5 +61,10 @@ class EasinessFactorServiceTest extends TestCase
             '99999999999999999999999999',
             0
         );
+    }
+
+    protected function tearDown()
+    {
+        unset($this->easinessFactorService);
     }
 }
