@@ -24,7 +24,6 @@ before_script:
   - php artisan migrate --env=testing
 
 script:
-  - phpunit -c ci_phpunit.xml --coverage-text
   - phpunit --coverage-clover=coverage.xml
 after_success:
     - bash <(curl -s https://codecov.io/bash)
