@@ -75,17 +75,17 @@ class QuestionConversation extends Conversation
                         }
                     } elseif ($answerWrongOnce) {
                         $status = AnswerDTO::WRONG_ONCE;
+                    } elseif ($answerWrong) {
+                        $status = AnswerDTO::WRONG_TWICE;
                     }
 
-                    if ($pass || $correct) {
-                        $dto = new AnswerDTO(
-                            $this->bot->getUser()->getId(),
-                            $question->getVocabulary()->id,
-                            $status
-                        );
-                        $service = app()->make(TestService::class);
-                        $service->answer($dto);
-                    }
+                    $dto = new AnswerDTO(
+                        $this->bot->getUser()->getId(),
+                        $question->getVocabulary()->id,
+                        $status
+                    );
+                    $service = app()->make(TestService::class);
+                    $service->answer($dto);
                     $this->bot->startConversation(new QuestionConversation());
                 } else {
                     $this->askQuestion($questionTemplate, $chance - 1, $question);
