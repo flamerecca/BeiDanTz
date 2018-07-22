@@ -17,25 +17,9 @@ use Illuminate\Support\Facades\Log;
 class QuestionConversation extends Conversation
 {
     /**
-     * @var TestServiceInterface
-     */
-    private $testService;
-
-    /**
-     *
-     * @var QuestionDTO
-     */
-    private $question;
-
-    /**
      * @var int
      */
     private $maxChance = 1;
-
-    public function __construct(TestServiceInterface $testService)
-    {
-        $this->testService = $testService;
-    }
 
     /**
      * Start the conversation.
@@ -44,8 +28,9 @@ class QuestionConversation extends Conversation
      */
     public function run()
     {
-        $this->question = $this->testService->getQuestion();
-        $options = $this->question->getOptions();
+        $service = app()->make(TestService::class);
+        $questionDTO = $service->getQuestion();
+        $options = $questionDTO->getOptions();
         $buttons = collect($options)
             ->map(function ($option, $idx) {
                 // each button value must be difference, otherwise telegram can't display template
@@ -54,21 +39,21 @@ class QuestionConversation extends Conversation
             ->push(Button::create('pass')->value('pass'))
             ->toArray();
 
-        $vocabulary = $this->question->getVocabulary();
+        $vocabulary = $questionDTO->getVocabulary();
         $questionTemplate = Question::create($vocabulary->content)->addButtons($buttons);
 
-        return $this->askQuestion($questionTemplate, $this->maxChance);
+        return $this->askQuestion($questionTemplate, $this->maxChance, $questionDTO);
     }
 
-    private function askQuestion(Question $questionTemplate, int $chance)
+    private function askQuestion(Question $questionTemplate, int $chance, QuestionDTO $question)
     {
         $startAskingTime = microtime(true);
-        $this->ask($questionTemplate, function (Answer $answer) use ($questionTemplate, $chance, $startAskingTime) {
+        $this->ask($questionTemplate, function (Answer $answer) use ($questionTemplate, $chance, $startAskingTime, $question) {
             if ($answer->isInteractiveMessageReply()) {
                 // change microtime to millisecond
                 $answerTime = (microtime(true) - $startAskingTime) * 1000;
                 $v = $answer->getValue();
-                $correct = $v === $this->question->getAnswer();
+                $correct = $v === $question->getAnswer();
                 $firstAnswer = $chance === $this->maxChance;
                 $correctAtOnce = $correct && $firstAnswer;
                 $answerWrong = !$correct;
@@ -93,15 +78,15 @@ class QuestionConversation extends Conversation
                     if ($pass || $correctAtOnce) {
                         $dto = new AnswerDTO(
                             $this->bot->getUser()->getId(),
-                            $this->question->getVocabulary()->id,
+                            $question->getVocabulary()->id,
                             $status
                         );
-                        $this->testService->answer($dto);
+                        $service = app()->make(TestService::class);
+                        $service->answer($dto);
                     }
-                    $service = app()->make(TestService::class);
-                    $this->bot->startConversation(new QuestionConversation($service));
+                    $this->bot->startConversation(new QuestionConversation());
                 } else {
-                    $this->askQuestion($questionTemplate, $chance - 1);
+                    $this->askQuestion($questionTemplate, $chance - 1, $question);
                 }
             }
         });

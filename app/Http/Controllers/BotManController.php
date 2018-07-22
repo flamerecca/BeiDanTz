@@ -30,7 +30,6 @@ class BotManController extends Controller
 
     public function startBeiDanTz(BotMan $bot)
     {
-        $service = app()->make(TestService::class);
-        $bot->startConversation(new QuestionConversation($service));
+        $bot->startConversation(new QuestionConversation());
     }
 }
