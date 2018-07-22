@@ -12,6 +12,7 @@ namespace App\DTO;
  * 答題狀況的資料格式
  * Class AnswerDTO
  * @package App\DTO
+ * @codeCoverageIgnore
  */
 class AnswerDTO
 {

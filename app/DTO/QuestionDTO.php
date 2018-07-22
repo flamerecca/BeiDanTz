@@ -14,6 +14,7 @@ use App\Entities\Vocabulary;
  * 題目的資料結構，供給 bot render 考題
  * Class QuestionDTO
  * @package App\DTO
+ * @codeCoverageIgnore
  */
 class QuestionDTO
 {
