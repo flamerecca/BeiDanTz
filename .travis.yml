@@ -1,4 +1,26 @@
 language: php
+
 php:
-  - 7.1.9
-  - nightly
+  - 7.1
+
+before_install:
+  - mysql -e 'CREATE DATABASE testing;'
+
+install:
+  - composer install --prefer-dist --optimize-autoloader --quiet
+
+notifications:
+  email:
+    recipients:
+      - shana0440@gmail.com
+      - flamerecca711@gmail.com
+    on_success: always
+    on_failure: always
+
+services:
+  - mysql
+
+before_script:
+  - php artisan migrate --env=testing
+
+script: phpunit -c ci_phpunit.xml --coverage-text
