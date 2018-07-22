@@ -4,6 +4,7 @@ namespace App\Http\Conversations;
 
 use App\DTO\AnswerDTO;
 use App\DTO\QuestionDTO;
+use App\Services\TestService;
 use App\Services\TestServiceInterface;
 use BotMan\BotMan\Interfaces\UserInterface;
 use BotMan\BotMan\Messages\Conversations\Conversation;
@@ -71,7 +72,8 @@ class QuestionConversation extends Conversation
                 $pass = $v === 'pass';
 
                 if ($correct || ($answerWrong && !$answerWrongOnce) || $pass) {
-                    $this->bot->startConversation(new QuestionConversation($this->testService));
+                    $service = app()->make(TestService::class);
+                    $this->bot->startConversation(new QuestionConversation($service));
                 } else {
                     $this->askQuestion($questionTemplate, $chance - 1);
                 }
