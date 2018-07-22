@@ -199,9 +199,14 @@ class QuestionConversationTest extends TestCase
     /**
      * @test
      */
-    public function 測試再次回答錯誤後詢問新問題()
+    public function 測試再次回答錯誤後詢問新問題，TestService收到錯誤兩次的通知()
     {
         $this->mockGetQuestionReturn([$this->questionDTO1, $this->questionDTO2]);
+        $this->shouldReceiveAnswer(new AnswerDTO(
+            $this->userId,
+            $this->questionDTO1->getVocabulary()->id,
+            AnswerDTO::WRONG_TWICE
+        ));
 
         $this->bot
             ->receives('開始複習')
