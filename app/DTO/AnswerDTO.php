@@ -30,10 +30,10 @@ class AnswerDTO
      */
     private $answeringStatus;
 
-    public function __construct(int $userId, int $vocabularyID, int $status)
+    public function __construct(int $userId, int $vocabularyId, int $status)
     {
         $this->userId = $userId;
-        $this->vocabularyID = $vocabularyID;
+        $this->vocabularyId = $vocabularyId;
         $this->answeringStatus = $status;
     }
 
