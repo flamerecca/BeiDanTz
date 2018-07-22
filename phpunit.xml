@@ -31,5 +31,7 @@
         <env name="CACHE_DRIVER" value="array"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="QUEUE_DRIVER" value="sync"/>
+        <env name="ANSWER_MIN_TIME" value="500"/>
+        <env name="ANSWER_MAX_TIME" value="1000"/>
     </php>
 </phpunit>
