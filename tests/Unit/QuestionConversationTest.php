@@ -124,7 +124,7 @@ class QuestionConversationTest extends TestCase
     /**
      * @test
      */
-    public function 測試在最短時間內回答正確時會進入下一題，並且service會收到最短時間內回答的通知()
+    public function 測試在最短時間內回答正確時會進入下一題，並且TestService會收到最短時間內回答的通知()
     {
         $this->mockGetQuestionReturn([$this->questionDTO1, $this->questionDTO2]);
         $this->shouldReceiveAnswer(new AnswerDTO(
@@ -143,7 +143,7 @@ class QuestionConversationTest extends TestCase
     /**
      * @test
      */
-    public function 測試在介於最短時間跟最長時限內回答正確時，service會收到介於時限內回答的通知()
+    public function 測試在介於最短時間跟最長時限內回答正確時，TestService會收到介於時限內回答的通知()
     {
         $this->mockGetQuestionReturn([$this->questionDTO1, $this->questionDTO2]);
         $this->shouldReceiveAnswer(new AnswerDTO(
@@ -161,7 +161,7 @@ class QuestionConversationTest extends TestCase
     /**
      * @test
      */
-    public function 測試在超出最長時限後回答正確時，service會收到超出時限後回答正確的通知()
+    public function 測試在超出最長時限後回答正確時，TestService會收到超出時限後回答正確的通知()
     {
         $this->mockGetQuestionReturn([$this->questionDTO1, $this->questionDTO2]);
         $this->shouldReceiveAnswer(new AnswerDTO(
@@ -179,15 +179,21 @@ class QuestionConversationTest extends TestCase
     /**
      * @test
      */
-    public function 測試回答錯誤時可以重複回答問題()
+    public function 測試回答錯誤時可以重複回答問題，第二次回答正確後TestService可收到錯誤一次的通知()
     {
-        $this->mockGetQuestionReturn([$this->questionDTO1]);
+        $this->mockGetQuestionReturn([$this->questionDTO1, $this->questionDTO2]);
+        $this->shouldReceiveAnswer(new AnswerDTO(
+            $this->userId,
+            $this->questionDTO1->getVocabulary()->id,
+            AnswerDTO::WRONG_ONCE
+        ));
 
         $this->bot
             ->receives('開始複習')
             ->assertTemplate($this->questionTemplate1, true)
             ->receivesInteractiveMessage($this->questionDTO1->getAnswer() + 1)
-            ->assertTemplate($this->questionTemplate1, true);
+            ->assertTemplate($this->questionTemplate1, true)
+            ->receivesInteractiveMessage($this->questionDTO1->getAnswer());
     }
 
     /**
