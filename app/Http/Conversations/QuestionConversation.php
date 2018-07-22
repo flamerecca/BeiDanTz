@@ -73,9 +73,11 @@ class QuestionConversation extends Conversation
                         } else {
                             $status = AnswerDTO::CORRECT_OVER_MAX_TIME;
                         }
+                    } elseif ($answerWrongOnce) {
+                        $status = AnswerDTO::WRONG_ONCE;
                     }
 
-                    if ($pass || $correctAtOnce) {
+                    if ($pass || $correct) {
                         $dto = new AnswerDTO(
                             $this->bot->getUser()->getId(),
                             $question->getVocabulary()->id,
