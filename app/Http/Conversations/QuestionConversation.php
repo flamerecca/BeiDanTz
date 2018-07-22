@@ -55,30 +55,10 @@ class QuestionConversation extends Conversation
                 $v = $answer->getValue();
                 $correct = $v === $question->getAnswer();
                 $firstAnswer = $chance === $this->maxChance;
-                $correctAtOnce = $correct && $firstAnswer;
-                $answerWrong = !$correct;
-                $answerWrongOnce = $correct && !$firstAnswer;
                 $pass = $v === 'pass';
 
                 if ($correct || !$firstAnswer || $pass) {
-                    if ($pass) {
-                        $status = AnswerDTO::PASS;
-                    } elseif ($correctAtOnce) {
-                        $min = config('botman.config.answer_min_time');
-                        $max = config('botman.config.answer_max_time');
-                        if ($answerTime < $min) {
-                            $status = AnswerDTO::CORRECT_LESS_MIN_TIME;
-                        } elseif ($answerTime >= $min && $answerTime < $max) {
-                            $status = AnswerDTO::CORRECT_BETWEEN_MIN_MAX_TIME;
-                        } else {
-                            $status = AnswerDTO::CORRECT_OVER_MAX_TIME;
-                        }
-                    } elseif ($answerWrongOnce) {
-                        $status = AnswerDTO::WRONG_ONCE;
-                    } elseif ($answerWrong) {
-                        $status = AnswerDTO::WRONG_TWICE;
-                    }
-
+                    $status = $this->getAnsweringStatus($pass, $answerTime, $firstAnswer, $correct);
                     $dto = new AnswerDTO(
                         $this->bot->getUser()->getId(),
                         $question->getVocabulary()->id,
@@ -92,5 +72,23 @@ class QuestionConversation extends Conversation
                 }
             }
         });
+    }
+
+    private function getAnsweringStatus($pass, $answerTime, $firstAnswer, $correct): int
+    {
+        if ($pass) return AnswerDTO::PASS;
+        if ($correct && $firstAnswer) {
+            $min = config('botman.config.answer_min_time');
+            $max = config('botman.config.answer_max_time');
+            if ($answerTime < $min) {
+                return AnswerDTO::CORRECT_LESS_MIN_TIME;
+            } elseif ($answerTime >= $min && $answerTime < $max) {
+                return AnswerDTO::CORRECT_BETWEEN_MIN_MAX_TIME;
+            }
+            return AnswerDTO::CORRECT_OVER_MAX_TIME;
+        }
+        if ($correct && !$firstAnswer) return AnswerDTO::WRONG_ONCE;
+
+        return AnswerDTO::WRONG_TWICE;
     }
 }
