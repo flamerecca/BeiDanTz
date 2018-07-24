@@ -10,14 +10,16 @@ namespace App\Services;
 
 use App\DTO\AnswerDTO;
 use App\DTO\QuestionDTO;
+use App\Entities\TelegramUser;
 
 interface TestServiceInterface
 {
     /**
      * 取得問題
+     * @param TelegramUser $telegramUser
      * @return QuestionDTO
      */
-    public function getQuestion(): QuestionDTO;
+    public function getQuestion(TelegramUser $telegramUser): QuestionDTO;
 
     /**
      * 回傳答案狀況

@@ -21,4 +21,14 @@ class TelegramUser extends Model implements Transformable
      * @var array
      */
     protected $fillable = [];
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function reviewingVocabularies()
+    {
+        return $this->belongsToMany(Vocabulary::class)
+            ->withPivot('review_date', 'easiest_factor')
+            ->wherePivot('review_date', date('Y-m-d'));
+    }
 }
