@@ -6,6 +6,7 @@ use App\DTO\AnswerDTO;
 use App\DTO\QuestionDTO;
 use App\Services\TestService;
 use App\Services\TestServiceInterface;
+use App\Services\UserService;
 use BotMan\BotMan\Interfaces\UserInterface;
 use BotMan\BotMan\Messages\Conversations\Conversation;
 use BotMan\BotMan\Messages\Incoming\Answer;
@@ -29,8 +30,11 @@ class QuestionConversation extends Conversation
      */
     public function run()
     {
-        $service = app()->make(TestService::class);
-        $questionDTO = $service->getQuestion();
+        $testService = app()->make(TestService::class);
+        $userService = app()->make(UserService::class);
+        $userId = $this->bot->getUser()->getId();
+        $user = $userService->fistOrCreateUser($userId);
+        $questionDTO = $testService->getQuestion($user);
         $options = $questionDTO->getOptions();
         $buttons = collect($options)
             ->map(function ($option, $idx) {
