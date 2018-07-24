@@ -22,5 +22,6 @@ jobs: # a collection of steps
             - vendor
       - run: touch storage/testing.sqlite 
       - run: php artisan migrate --env=testing --database=sqlite_testing --force
-      - run: ./vendor/bin/phpunit
+      - run: ./vendor/bin/phpunit --coverage-clover=coverage.xml
+      - run: bash <(curl -s https://codecov.io/bash)
       # See https://circleci.com/docs/2.0/deployment-integrations/ for deploy examples
