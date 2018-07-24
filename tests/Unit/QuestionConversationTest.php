@@ -4,9 +4,11 @@ namespace Tests\Unit;
 
 use App\DTO\AnswerDTO;
 use App\DTO\QuestionDTO;
+use App\Entities\TelegramUser;
 use App\Entities\Vocabulary;
 use App\Services\TestService;
 use App\Services\TestServiceInterface;
+use App\Services\UserService;
 use BotMan\BotMan\Messages\Incoming\Answer;
 use BotMan\BotMan\Messages\Outgoing\Actions\Button;
 use BotMan\BotMan\Messages\Outgoing\Question;
@@ -51,7 +53,13 @@ class QuestionConversationTest extends TestCase
     {
         parent::setUp();
         $this->testServiceMock = Mockery::mock(TestServiceInterface::class);
+        $userServiceStub = $this->createMock(UserService::class);
+        $user = new TelegramUser();
+        $user->id = 1;
+        $user->telegram_id = 1;
+        $userServiceStub->method('fistOrCreateUser')->willReturn($user);
         $this->app->instance(TestService::class, $this->testServiceMock);
+        $this->app->instance(UserService::class, $userServiceStub);
 
         $v1 = new Vocabulary([
             'content' => 'test',
