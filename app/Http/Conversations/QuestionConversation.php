@@ -17,9 +17,10 @@ use Illuminate\Support\Facades\Log;
 class QuestionConversation extends Conversation
 {
     /**
+     * 最大能錯誤的次數，超過這個次數後進入到下一題
      * @var int
      */
-    private $maxChance = 1;
+    private $maxWroungTimes = 1;
 
     /**
      * Start the conversation.
@@ -42,42 +43,23 @@ class QuestionConversation extends Conversation
         $vocabulary = $questionDTO->getVocabulary();
         $questionTemplate = Question::create($vocabulary->content)->addButtons($buttons);
 
-        return $this->askQuestion($questionTemplate, $this->maxChance, $questionDTO);
+        return $this->askQuestion($questionTemplate, 0, $questionDTO);
     }
 
-    private function askQuestion(Question $questionTemplate, int $chance, QuestionDTO $question)
+    private function askQuestion(Question $questionTemplate, int $wrongTimes, QuestionDTO $question)
     {
         $startAskingTime = microtime(true);
-        $this->ask($questionTemplate, function (Answer $answer) use ($questionTemplate, $chance, $startAskingTime, $question) {
+        $this->ask($questionTemplate, function (Answer $answer) use ($questionTemplate, $wrongTimes, $startAskingTime, $question) {
             if ($answer->isInteractiveMessageReply()) {
-                // change microtime to millisecond
+                // convert microsecond to millisecond, because ANSWER_MIN/MAX_TIME is set by millisecond
                 $answerTime = (microtime(true) - $startAskingTime) * 1000;
                 $v = $answer->getValue();
                 $correct = $v === $question->getAnswer();
-                $firstAnswer = $chance === $this->maxChance;
-                $correctAtOnce = $correct && $firstAnswer;
-                $answerWrong = !$correct;
-                $answerWrongOnce = $correct && !$firstAnswer;
                 $pass = $v === 'pass';
+                $wrongTimes += !$correct;
 
-                if ($correct || !$firstAnswer || $pass) {
-                    if ($pass) {
-                        $status = AnswerDTO::PASS;
-                    } elseif ($correctAtOnce) {
-                        $min = config('botman.config.answer_min_time');
-                        $max = config('botman.config.answer_max_time');
-                        if ($answerTime < $min) {
-                            $status = AnswerDTO::CORRECT_LESS_MIN_TIME;
-                        } elseif ($answerTime >= $min && $answerTime < $max) {
-                            $status = AnswerDTO::CORRECT_BETWEEN_MIN_MAX_TIME;
-                        } else {
-                            $status = AnswerDTO::CORRECT_OVER_MAX_TIME;
-                        }
-                    } elseif ($answerWrongOnce) {
-                        $status = AnswerDTO::WRONG_ONCE;
-                    } elseif ($answerWrong) {
-                        $status = AnswerDTO::WRONG_TWICE;
-                    }
+                if ($correct || $wrongTimes > $this->maxWroungTimes || $pass) {
+                    $status = $this->calculateAnsweringStatus($pass, $wrongTimes, $answerTime);
 
                     $dto = new AnswerDTO(
                         $this->bot->getUser()->getId(),
@@ -88,9 +70,27 @@ class QuestionConversation extends Conversation
                     $service->answer($dto);
                     $this->bot->startConversation(new QuestionConversation());
                 } else {
-                    $this->askQuestion($questionTemplate, $chance - 1, $question);
+                    $this->askQuestion($questionTemplate, $wrongTimes, $question);
                 }
             }
         });
     }
+
+    private function calculateAnsweringStatus(bool $isPass, int $wrongTimes, float $answerTime): int
+    {
+        if ($isPass) return AnswerDTO::PASS;
+        if ($wrongTimes == 0) {
+            $min = config('botman.config.answer_min_time');
+            $max = config('botman.config.answer_max_time');
+            if ($answerTime < $min)
+                return AnswerDTO::CORRECT_LESS_MIN_TIME;
+            if ($answerTime >= $min && $answerTime < $max)
+                return AnswerDTO::CORRECT_BETWEEN_MIN_MAX_TIME;
+
+            return AnswerDTO::CORRECT_OVER_MAX_TIME;
+        }
+        if ($wrongTimes == 1) return AnswerDTO::WRONG_ONCE;
+        return AnswerDTO::WRONG_TWICE;
+    }
+
 }
