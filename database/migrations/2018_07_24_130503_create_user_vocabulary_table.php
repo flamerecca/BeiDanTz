@@ -13,9 +13,9 @@ class CreateUserVocabularyTable extends Migration
      */
     public function up()
     {
-        Schema::create('user_vocabulary', function (Blueprint $table) {
+        Schema::create('telegram_user_vocabulary', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('user_id')->comment('用戶 ID');
+            $table->integer('telegram_user_id')->comment('用戶 ID');
             $table->integer('vocabulary_id')->comment('單字 ID');
             $table->date('review_date')->comment('複習日期');
             $table->decimal('easiest_factor', 12, 3)->comment('單字對用戶簡易程度');
