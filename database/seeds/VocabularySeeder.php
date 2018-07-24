@@ -13,8 +13,50 @@ class VocabularySeeder extends Seeder
     public function run()
     {
         Vocabulary::create([
-            'vocabulary' => 'apple',
+            'content' => 'apple',
             'answer' => '蘋果',
+            'easiest_factor' => 2.5
+        ]);
+
+        Vocabulary::create([
+            'content' => 'apple',
+            'answer' => '蘋果',
+            'easiest_factor' => 2.5
+        ]);
+
+        Vocabulary::create([
+            'content' => 'test',
+            'answer' => '測試',
+            'easiest_factor' => 2.5
+        ]);
+
+        Vocabulary::create([
+            'content' => 'mission',
+            'answer' => '任務',
+            'easiest_factor' => 2.5
+        ]);
+
+        Vocabulary::create([
+            'content' => 'answer',
+            'answer' => '答案',
+            'easiest_factor' => 2.5
+        ]);
+
+        Vocabulary::create([
+            'content' => 'response',
+            'answer' => '回應',
+            'easiest_factor' => 2.5
+        ]);
+
+        Vocabulary::create([
+            'content' => 'question',
+            'answer' => '問題',
+            'easiest_factor' => 2.5
+        ]);
+
+        Vocabulary::create([
+            'content' => 'eloquent',
+            'answer' => '有說服力的',
             'easiest_factor' => 2.5
         ]);
     }

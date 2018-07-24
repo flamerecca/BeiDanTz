@@ -2,8 +2,8 @@
 
 namespace Tests;
 
-use App\BotManTester;
 use BotMan\BotMan\BotMan;
+use BotMan\Studio\Testing\BotManTester;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
@@ -19,4 +19,10 @@ abstract class TestCase extends BaseTestCase
      * @var BotManTester
      */
     protected $bot;
+
+    protected function assertDatabaseCount(string $table, array $data, int $expectCount)
+    {
+        $actual = \DB::table($table)->where($data)->count();
+        $this->assertEquals($expectCount, $actual);
+    }
 }
