@@ -8,13 +8,33 @@
 
 namespace App\Services;
 
+use App\Criteria\RandomCriteria;
+use App\Criteria\TodayVocabulariesCriteria;
+use App\Criteria\WrongAnswerCriteria;
 use App\DTO\AnswerDTO;
 use App\DTO\QuestionDTO;
 use App\Entities\TelegramUser;
 use App\Entities\Vocabulary;
+use App\Repositories\TelegramUserRepository;
+use App\Repositories\VocabularyRepository;
 
 class TestService implements TestServiceInterface
 {
+    private $vocabularyRepository;
+    private $telegramUserRepository;
+
+    /**
+     * TestService constructor.
+     * @param VocabularyRepository $vocabularyRepository
+     * @param TelegramUserRepository $telegramUserRepository
+     */
+    public function __construct(
+        VocabularyRepository $vocabularyRepository,
+        TelegramUserRepository $telegramUserRepository
+    ) {
+        $this->vocabularyRepository = $vocabularyRepository;
+        $this->telegramUserRepository = $telegramUserRepository;
+    }
 
     /**
      * @param TelegramUser $telegramUser
@@ -23,21 +43,17 @@ class TestService implements TestServiceInterface
     public function getQuestion(TelegramUser $telegramUser): QuestionDTO
     {
         // 找用戶是否有需要複習的單字
-        $vocabularies = $telegramUser->reviewingVocabularies()->get();
-
+        $this->vocabularyRepository->getByCriteria(new TodayVocabulariesCriteria($telegramUser));
+        $vocabularies = $this->vocabularyRepository->all();
         if ($vocabularies->isEmpty()) {
-            $vocabulary = Vocabulary::all()->random();
+            $vocabulary = $this->vocabularyRepository->getByCriteria(new RandomCriteria());
         } else {
             $vocabulary = $vocabularies->random();
         }
-        $wrongVocabulary = Vocabulary::where('id', '!=', $vocabulary->id)
-            ->inRandomOrder()
-            ->limit(4)
-            ->get();
-
+        $wrongVocabularies = $this->vocabularyRepository->getByCriteria(new WrongAnswerCriteria($vocabulary));
         $options = [];
         for ($i = 0; $i < 4; $i++) {
-            $options[$i] = $wrongVocabulary[$i]->answer;
+            $options[$i] = $wrongVocabularies[$i]->answer;
         }
 
         $answer = rand(0, 3);
