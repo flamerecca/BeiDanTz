@@ -53,7 +53,12 @@ class QuestionConversation extends Conversation
     private function askQuestion(Question $questionTemplate, int $wrongTimes, QuestionDTO $question)
     {
         $startAskingTime = microtime(true);
-        $this->ask($questionTemplate, function (Answer $answer) use ($questionTemplate, $wrongTimes, $startAskingTime, $question) {
+        $this->ask($questionTemplate, function (Answer $answer) use (
+            $questionTemplate,
+            $wrongTimes,
+            $startAskingTime,
+            $question
+        ) {
             if ($answer->isInteractiveMessageReply()) {
                 // convert microsecond to millisecond, because ANSWER_MIN/MAX_TIME is set by millisecond
                 $answerTime = (microtime(true) - $startAskingTime) * 1000;
@@ -82,19 +87,24 @@ class QuestionConversation extends Conversation
 
     private function calculateAnsweringStatus(bool $isPass, int $wrongTimes, float $answerTime): int
     {
-        if ($isPass) return AnswerDTO::PASS;
+        if ($isPass) {
+            return AnswerDTO::PASS;
+        }
         if ($wrongTimes == 0) {
             $min = config('botman.config.answer_min_time');
             $max = config('botman.config.answer_max_time');
-            if ($answerTime < $min)
+            if ($answerTime < $min) {
                 return AnswerDTO::CORRECT_LESS_MIN_TIME;
-            if ($answerTime >= $min && $answerTime < $max)
+            }
+            if ($answerTime >= $min && $answerTime < $max) {
                 return AnswerDTO::CORRECT_BETWEEN_MIN_MAX_TIME;
+            }
 
             return AnswerDTO::CORRECT_OVER_MAX_TIME;
         }
-        if ($wrongTimes == 1) return AnswerDTO::WRONG_ONCE;
+        if ($wrongTimes == 1) {
+            return AnswerDTO::WRONG_ONCE;
+        }
         return AnswerDTO::WRONG_TWICE;
     }
-
 }
