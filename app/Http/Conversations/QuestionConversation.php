@@ -53,21 +53,20 @@ class QuestionConversation extends Conversation
     private function askQuestion(Question $questionTemplate, int $wrongTimes, QuestionDTO $question)
     {
         $startAskingTime = microtime(true);
-        $this->ask(
+
+        $this->ask($questionTemplate, function (Answer $answer) use (
             $questionTemplate,
-            function (Answer $answer) use (
-                $questionTemplate,
-                $wrongTimes,
-                $startAskingTime,
-                $question
-            ) {
-                if ($answer->isInteractiveMessageReply()) {
-                    // convert microsecond to millisecond, because ANSWER_MIN/MAX_TIME is set by millisecond
-                    $answerTime = (microtime(true) - $startAskingTime) * 1000;
-                    $v = $answer->getValue();
-                    $correct = $v == $question->getAnswer();
-                    $pass = $v === 'pass';
-                    $wrongTimes += !$correct;
+            $wrongTimes,
+            $startAskingTime,
+            $question
+        ) {
+            if ($answer->isInteractiveMessageReply()) {
+                // convert microsecond to millisecond, because ANSWER_MIN/MAX_TIME is set by millisecond
+                $answerTime = (microtime(true) - $startAskingTime) * 1000;
+                $v = $answer->getValue();
+                $correct = $v == $question->getAnswer();
+                $pass = $v === 'pass';
+                $wrongTimes += !$correct;
 
                     if ($pass) {
                         $this->say('跳過');
