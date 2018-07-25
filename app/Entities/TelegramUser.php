@@ -27,7 +27,7 @@ class TelegramUser extends Model implements Transformable
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function Vocabularies()
+    public function vocabularies()
     {
         return $this->belongsToMany(Vocabulary::class)
             ->withPivot('review_date', 'easiest_factor');
