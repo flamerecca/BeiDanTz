@@ -145,6 +145,7 @@ class QuestionConversationTest extends TestCase
             ->receives('開始複習')
             ->assertTemplate($this->questionTemplate1, true)
             ->receivesInteractiveMessage($this->questionDTO1->getAnswer())
+            ->assertReply('答對惹')
             ->assertTemplate($this->questionTemplate2, true);
     }
 
@@ -200,8 +201,10 @@ class QuestionConversationTest extends TestCase
             ->receives('開始複習')
             ->assertTemplate($this->questionTemplate1, true)
             ->receivesInteractiveMessage($this->questionDTO1->getAnswer() + 1)
+            ->assertReply('答錯惹')
             ->assertTemplate($this->questionTemplate1, true)
-            ->receivesInteractiveMessage($this->questionDTO1->getAnswer());
+            ->receivesInteractiveMessage($this->questionDTO1->getAnswer())
+            ->assertReply('答對惹');
     }
 
     /**
@@ -220,8 +223,10 @@ class QuestionConversationTest extends TestCase
             ->receives('開始複習')
             ->assertTemplate($this->questionTemplate1, true)
             ->receivesInteractiveMessage($this->questionDTO1->getAnswer() + 1)
+            ->assertReply('答錯惹')
             ->assertTemplate($this->questionTemplate1, true)
             ->receivesInteractiveMessage($this->questionDTO1->getAnswer() + 1)
+            ->assertReply('答錯惹')
             ->assertTemplate($this->questionTemplate2, true);
     }
 
@@ -241,6 +246,7 @@ class QuestionConversationTest extends TestCase
             ->receives('開始複習')
             ->assertTemplate($this->questionTemplate1, true)
             ->receivesInteractiveMessage('pass')
+            ->assertReply('跳過')
             ->assertTemplate($this->questionTemplate2, true);
     }
 }
