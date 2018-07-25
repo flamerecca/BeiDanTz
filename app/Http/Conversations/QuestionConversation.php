@@ -62,6 +62,15 @@ class QuestionConversation extends Conversation
                 $pass = $v === 'pass';
                 $wrongTimes += !$correct;
 
+                if ($pass) {
+                    $this->say('跳過');
+                } elseif ($correct) {
+                    $this->say('答對惹');
+                } else {
+                    $this->say('答錯惹');
+                }
+
+
                 if ($correct || $wrongTimes > $this->maxWroungTimes || $pass) {
                     $status = $this->calculateAnsweringStatus($pass, $wrongTimes, $answerTime);
 
