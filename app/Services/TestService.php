@@ -43,9 +43,9 @@ class TestService implements TestServiceInterface
     public function getQuestion(TelegramUser $telegramUser): QuestionDTO
     {
         // 找用戶是否有需要複習的單字
-        $this->vocabularyRepository->getByCriteria(new TodayVocabulariesCriteria($telegramUser));
-        $vocabularies = $this->vocabularyRepository->all();
-
+        $vocabularies = $this->vocabularyRepository
+            ->getByCriteria(new TodayVocabulariesCriteria($telegramUser));
+        
         if ($vocabularies->isEmpty()) {
             $vocabulary = $this->vocabularyRepository
                 ->getByCriteria(new RandomCriteria())
