@@ -58,7 +58,7 @@ class QuestionConversation extends Conversation
                 // convert microsecond to millisecond, because ANSWER_MIN/MAX_TIME is set by millisecond
                 $answerTime = (microtime(true) - $startAskingTime) * 1000;
                 $v = $answer->getValue();
-                $correct = $v === $question->getAnswer();
+                $correct = $v == $question->getAnswer();
                 $pass = $v === 'pass';
                 $wrongTimes += !$correct;
 
