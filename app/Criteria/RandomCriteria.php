@@ -22,7 +22,7 @@ class RandomCriteria implements CriteriaInterface
      */
     public function apply($model, RepositoryInterface $repository)
     {
-        $model = $model->inRandomOrder()->first();
+        $model = $model->inRandomOrder()->limit(1);
         return $model;
     }
 }
