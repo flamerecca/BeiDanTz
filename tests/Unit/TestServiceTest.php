@@ -35,26 +35,26 @@ class TestServiceTest extends TestCase
         ]);
 
         Vocabulary::create([
-            'content' => 'bee',
-            'answer' => '蜜蜂',
+            'content' => 'apple',
+            'answer' => '蘋果',
             'easiest_factor' => 2.5
         ]);
 
         Vocabulary::create([
-            'content' => 'bee',
-            'answer' => '蜜蜂',
+            'content' => 'cat',
+            'answer' => '貓',
             'easiest_factor' => 2.5
         ]);
 
         Vocabulary::create([
-            'content' => 'bee',
-            'answer' => '蜜蜂',
+            'content' => 'dog',
+            'answer' => '狗',
             'easiest_factor' => 2.5
         ]);
 
         $vocabulary = Vocabulary::create([
-            'content' => 'apple',
-            'answer' => '蘋果',
+            'content' => 'egg',
+            'answer' => '雞蛋',
             'easiest_factor' => 2.5
         ]);
 
@@ -81,6 +81,20 @@ class TestServiceTest extends TestCase
         );
         $telegramUser = new TelegramUser();
         $telegramUser->id = 1;
-        $this->assertInstanceOf(QuestionDTO::class, $testService->getQuestion($telegramUser));
+        $question = $testService->getQuestion($telegramUser);
+        $this->assertInstanceOf(QuestionDTO::class, $question);
+        $this->assertEquals(4, count($question->getOptions()));
+    }
+
+    public function testGetQuestionAnswerIsCorrect()
+    {
+        $testService = new TestService(
+            new VocabularyRepositoryEloquent(app()),
+            new TelegramUserRepositoryEloquent(app())
+        );
+        $telegramUser = new TelegramUser();
+        $telegramUser->id = 1;
+        $question = $testService->getQuestion($telegramUser);
+        $this->assertEquals($question->getVocabulary()->answer, $question->getOptions()[$question->getAnswer()]);
     }
 }

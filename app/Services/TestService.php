@@ -45,12 +45,17 @@ class TestService implements TestServiceInterface
         // 找用戶是否有需要複習的單字
         $this->vocabularyRepository->getByCriteria(new TodayVocabulariesCriteria($telegramUser));
         $vocabularies = $this->vocabularyRepository->all();
+
         if ($vocabularies->isEmpty()) {
-            $vocabulary = $this->vocabularyRepository->getByCriteria(new RandomCriteria());
+            $vocabulary = $this->vocabularyRepository
+                ->getByCriteria(new RandomCriteria())
+                ->first();
         } else {
             $vocabulary = $vocabularies->random();
         }
-        $wrongVocabularies = $this->vocabularyRepository->getByCriteria(new WrongAnswerCriteria($vocabulary));
+
+        $wrongVocabularies = $this->vocabularyRepository
+            ->getByCriteria(new WrongAnswerCriteria($vocabulary));
         $options = [];
         for ($i = 0; $i < 4; $i++) {
             $options[$i] = $wrongVocabularies[$i]->answer;
