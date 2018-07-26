@@ -14,9 +14,11 @@ use Prettus\Repository\Contracts\RepositoryInterface;
 class WrongAnswerCriteria implements CriteriaInterface
 {
     private $vocabulary;
-    public function __construct(Vocabulary $vocabulary)
+    private $number;
+    public function __construct(Vocabulary $vocabulary, int $number)
     {
         $this->vocabulary = $vocabulary;
+        $this->number = $number;
     }
 
     /**
@@ -31,7 +33,7 @@ class WrongAnswerCriteria implements CriteriaInterface
     {
         $model = $model->where('id', '!=', $this->vocabulary->id)
             ->inRandomOrder()
-            ->limit(4);
+            ->limit($this->number);
         return $model;
     }
 }
