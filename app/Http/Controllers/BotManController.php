@@ -7,6 +7,7 @@ use App\Services\TestService;
 use BotMan\BotMan\BotMan;
 use Illuminate\Http\Request;
 use App\Conversations\ExampleConversation;
+use Illuminate\Support\Facades\Storage;
 
 class BotManController extends Controller
 {
@@ -26,6 +27,13 @@ class BotManController extends Controller
     public function tinker()
     {
         return view('tinker');
+    }
+
+    public function welcomeMessage(BotMan $bot)
+    {
+        $welcomeMessage = Storage::disk('local')->get('welcomeMessage.txt');
+
+        $bot->reply($welcomeMessage);
     }
 
     public function startBeiDanTz(BotMan $bot)
