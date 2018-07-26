@@ -68,32 +68,31 @@ class QuestionConversation extends Conversation
                 $pass = $v === 'pass';
                 $wrongTimes += !$correct;
 
-                    if ($pass) {
-                        $this->say('跳過');
-                    } elseif ($correct) {
-                        $this->say('答對惹');
-                    } else {
-                        $this->say('答錯惹');
-                    }
+                if ($pass) {
+                    $this->say('跳過');
+                } elseif ($correct) {
+                    $this->say('答對惹');
+                } else {
+                    $this->say('答錯惹');
+                }
 
 
-                    if ($correct || $wrongTimes > $this->maxWroungTimes || $pass) {
-                        $status = $this->calculateAnsweringStatus($pass, $wrongTimes, $answerTime);
+                if ($correct || $wrongTimes > $this->maxWroungTimes || $pass) {
+                    $status = $this->calculateAnsweringStatus($pass, $wrongTimes, $answerTime);
 
-                        $dto = new AnswerDTO(
-                            $this->bot->getUser()->getId(),
-                            $question->getVocabulary()->id,
-                            $status
-                        );
-                        $service = app()->make(TestService::class);
-                        $service->answer($dto);
-                        $this->bot->startConversation(new QuestionConversation());
-                    } else {
-                        $this->askQuestion($questionTemplate, $wrongTimes, $question);
-                    }
+                    $dto = new AnswerDTO(
+                        $this->bot->getUser()->getId(),
+                        $question->getVocabulary()->id,
+                        $status
+                    );
+                    $service = app()->make(TestService::class);
+                    $service->answer($dto);
+                    $this->bot->startConversation(new QuestionConversation());
+                } else {
+                    $this->askQuestion($questionTemplate, $wrongTimes, $question);
                 }
             }
-        );
+        });
     }
 
     private function calculateAnsweringStatus(bool $isPass, int $wrongTimes, float $answerTime): int
