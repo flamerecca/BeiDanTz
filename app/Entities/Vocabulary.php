@@ -3,6 +3,7 @@
 namespace App\Entities;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Prettus\Repository\Contracts\Transformable;
 use Prettus\Repository\Traits\TransformableTrait;
 
@@ -21,10 +22,18 @@ class Vocabulary extends Model implements Transformable
      * @var array
      */
     protected $fillable = [
-        'vocabulary',
+        'content',
         'answer',
         'easiest_factor',
     ];
 
     protected $table = 'vocabularies';
+
+    /**
+     * @return BelongsToMany
+     */
+    public function telegramUsers()
+    {
+        return $this->belongsToMany(TelegramUser::class);
+    }
 }
