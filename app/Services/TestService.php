@@ -55,7 +55,7 @@ class TestService implements TestServiceInterface
         }
 
         $wrongVocabularies = $this->vocabularyRepository
-            ->getByCriteria(new WrongAnswerCriteria($vocabulary));
+            ->getByCriteria(new WrongAnswerCriteria($vocabulary, 4));
         $options = [];
         for ($i = 0; $i < 4; $i++) {
             $options[$i] = $wrongVocabularies[$i]->answer;
