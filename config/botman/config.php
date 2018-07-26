@@ -25,4 +25,7 @@ return [
     |
     */
     'user_cache_time' => 30,
+
+    'answer_min_time' => (int)env('ANSWER_MIN_TIME', '5000'),
+    'answer_max_time' => (int)env('ANSWER_MAX_TIME', '30000'),
 ];

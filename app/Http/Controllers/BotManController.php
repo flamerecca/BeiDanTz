@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Conversations\QuestionConversation;
+use App\Services\TestService;
 use BotMan\BotMan\BotMan;
 use Illuminate\Http\Request;
 use App\Conversations\ExampleConversation;
+use Illuminate\Support\Facades\Storage;
 
 class BotManController extends Controller
 {
@@ -26,12 +29,22 @@ class BotManController extends Controller
         return view('tinker');
     }
 
-    /**
-     * Loaded through routes/botman.php
-     * @param  BotMan $bot
-     */
-    public function startConversation(BotMan $bot)
+    public function welcomeMessage(BotMan $bot)
     {
-        $bot->startConversation(new ExampleConversation());
+        $welcomeMessage = Storage::disk('local')->get('welcomeMessage.txt');
+
+        $bot->reply($welcomeMessage);
+    }
+
+    public function startBeiDanTz(BotMan $bot)
+    {
+        $bot->startConversation(new QuestionConversation());
+    }
+
+    public function help(BotMan $bot)
+    {
+        $helpMessage = Storage::disk('local')->get('helpMessage.txt');
+
+        $bot->reply($helpMessage);
     }
 }
