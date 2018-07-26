@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Repositories\TelegramUserRepository;
+use App\Repositories\TelegramUserRepositoryEloquent;
+use App\Repositories\VocabularyRepository;
+use App\Repositories\VocabularyRepositoryEloquent;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -24,12 +28,12 @@ class RepositoryServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bind(
-            \App\Repositories\VocabularyRepository::class,
-            \App\Repositories\VocabularyRepositoryEloquent::class
+            VocabularyRepository::class,
+            VocabularyRepositoryEloquent::class
         );
         $this->app->bind(
-            \App\Repositories\TelegramUserRepository::class,
-            \App\Repositories\TelegramUserRepositoryEloquent::class
+            TelegramUserRepository::class,
+            TelegramUserRepositoryEloquent::class
         );
         //:end-bindings:
     }
