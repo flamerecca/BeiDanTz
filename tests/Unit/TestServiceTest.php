@@ -8,6 +8,9 @@
 
 namespace Tests\Unit;
 
+use App\Criteria\RandomCriteria;
+use App\Criteria\TodayVocabulariesCriteria;
+use App\Criteria\WrongAnswerCriteria;
 use App\DTO\QuestionDTO;
 use App\Entities\TelegramUser;
 use App\Entities\Vocabulary;
@@ -23,6 +26,7 @@ use Tests\TestCase;
 class TestServiceTest extends TestCase
 {
     use DatabaseTransactions;
+    private $telegramUser;
 
     public function setUp()
     {
@@ -56,28 +60,17 @@ class TestServiceTest extends TestCase
             'answer' => '雞蛋',
             'easiest_factor' => 2.5
         ]);
+
+        $this->telegramUser = TelegramUser::create([
+            'telegram_id' => '1'
+        ]);
+
     }
 
     public function testGetQuestionShouldReturnQuestionDTO()
     {
-
-        $vocabulary = Vocabulary::find(3);
-
-        $vocabulary->telegramUsers()->attach(
-            1,
-            [
-                'review_date' => '2018-07-25',
-                'easiest_factor' => 0
-            ]
-        );
-
-        $testService = new TestService(
-            new VocabularyRepositoryEloquent(app()),
-            new TelegramUserRepositoryEloquent(app())
-        );
-        $telegramUser = new TelegramUser();
-        $telegramUser->id = 1;
-        $question = $testService->getQuestion($telegramUser);
+        $testService = app()->make(TestService::class);
+        $question = $testService->getQuestion($this->telegramUser);
         $this->assertInstanceOf(QuestionDTO::class, $question);
         $this->assertEquals(4, count($question->getOptions()));
     }
@@ -85,41 +78,31 @@ class TestServiceTest extends TestCase
     public function testGetQuestionAnswerIsCorrect()
     {
         $vocabulary = Vocabulary::find(3);
+        $wrongAnswers = Vocabulary::where('id', '!=', 3)->limit(4)->get();
 
-        $vocabulary->telegramUsers()->attach(
-            1,
-            [
-                'review_date' => '2018-07-25',
-                'easiest_factor' => 0
-            ]
-        );
+        $mock = $this->createMock(VocabularyRepositoryEloquent::class);
+        $mock->method('getByCriteria')->withConsecutive(
+            $this->isInstanceOf(TodayVocabulariesCriteria::class),
+            $this->isInstanceOf(WrongAnswerCriteria::class)
+        )->will($this->onConsecutiveCalls(
+            collect([$vocabulary]),
+            collect($wrongAnswers)
+        ));
 
-        $testService = new TestService(
-            new VocabularyRepositoryEloquent(app()),
-            new TelegramUserRepositoryEloquent(app())
-        );
-        $telegramUser = new TelegramUser();
-        $telegramUser->id = 1;
-        $question = $testService->getQuestion($telegramUser);
-        $this->assertEquals($question->getVocabulary()->answer, $question->getOptions()[$question->getAnswer()]);
+        app()->instance(VocabularyRepositoryEloquent::class, $mock);
+
+        $service = app()->make(TestService::class);
+        $q = $service->getQuestion($this->telegramUser);
+        $this->assertEquals($vocabulary->answer, $q->getOptions()[$q->getAnswer()]);
     }
 
     public function testIfUserHasNoVocabularyGetQuestionShouldWorkProperly()
     {
 
-        TelegramUser::create([
-            'telegram_id' => '1'
-        ]);
 
+        $testService = app()->make(TestService::class);
 
-        $testService = new TestService(
-            app()->make(VocabularyRepository::class),
-            app()->make(TelegramUserRepository::class)
-        );
-        $telegramUser = new TelegramUser();
-        $telegramUser->id = 1;
-
-        $question = $testService->getQuestion($telegramUser);
+        $question = $testService->getQuestion($this->telegramUser);
         $this->assertInstanceOf(QuestionDTO::class, $question);
         $this->assertEquals(4, count($question->getOptions()));
     }

@@ -48,18 +48,17 @@ class TestService implements TestServiceInterface
         
         if ($vocabularies->isEmpty()) {
             $vocabulary = $this->vocabularyRepository
-                ->getByCriteria(new RandomCriteria())
+                ->getByCriteria(new RandomCriteria(1))
                 ->first();
         } else {
             $vocabulary = $vocabularies->random();
         }
 
-        $wrongVocabularies = $this->vocabularyRepository
-            ->getByCriteria(new WrongAnswerCriteria($vocabulary, 4));
-        $options = [];
-        for ($i = 0; $i < 4; $i++) {
-            $options[$i] = $wrongVocabularies[$i]->answer;
-        }
+        $options = $this->vocabularyRepository
+            ->getByCriteria(new WrongAnswerCriteria($vocabulary, 4))
+            ->map(function ($vocabulary) { return $vocabulary->answer; })
+            ->toArray();
+
 
         $answer = rand(0, 3);
         $options[$answer] = $vocabulary->answer;
