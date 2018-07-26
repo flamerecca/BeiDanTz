@@ -53,48 +53,46 @@ class QuestionConversation extends Conversation
     private function askQuestion(Question $questionTemplate, int $wrongTimes, QuestionDTO $question)
     {
         $startAskingTime = microtime(true);
-        $this->ask(
+
+        $this->ask($questionTemplate, function (Answer $answer) use (
             $questionTemplate,
-            function (Answer $answer) use (
-                $questionTemplate,
-                $wrongTimes,
-                $startAskingTime,
-                $question
-            ) {
-                if ($answer->isInteractiveMessageReply()) {
-                    // convert microsecond to millisecond, because ANSWER_MIN/MAX_TIME is set by millisecond
-                    $answerTime = (microtime(true) - $startAskingTime) * 1000;
-                    $v = $answer->getValue();
-                    $correct = $v == $question->getAnswer();
-                    $pass = $v === 'pass';
-                    $wrongTimes += !$correct;
+            $wrongTimes,
+            $startAskingTime,
+            $question
+        ) {
+            if ($answer->isInteractiveMessageReply()) {
+                // convert microsecond to millisecond, because ANSWER_MIN/MAX_TIME is set by millisecond
+                $answerTime = (microtime(true) - $startAskingTime) * 1000;
+                $v = $answer->getValue();
+                $correct = $v == $question->getAnswer();
+                $pass = $v === 'pass';
+                $wrongTimes += !$correct;
 
-                    if ($pass) {
-                        $this->say('跳過');
-                    } elseif ($correct) {
-                        $this->say('答對惹');
-                    } else {
-                        $this->say('答錯惹');
-                    }
+                if ($pass) {
+                    $this->say('跳過');
+                } elseif ($correct) {
+                    $this->say('答對惹');
+                } else {
+                    $this->say('答錯惹');
+                }
 
 
-                    if ($correct || $wrongTimes > $this->maxWroungTimes || $pass) {
-                        $status = $this->calculateAnsweringStatus($pass, $wrongTimes, $answerTime);
+                if ($correct || $wrongTimes > $this->maxWroungTimes || $pass) {
+                    $status = $this->calculateAnsweringStatus($pass, $wrongTimes, $answerTime);
 
-                        $dto = new AnswerDTO(
-                            $this->bot->getUser()->getId(),
-                            $question->getVocabulary()->id,
-                            $status
-                        );
-                        $service = app()->make(TestService::class);
-                        $service->answer($dto);
-                        $this->bot->startConversation(new QuestionConversation());
-                    } else {
-                        $this->askQuestion($questionTemplate, $wrongTimes, $question);
-                    }
+                    $dto = new AnswerDTO(
+                        $this->bot->getUser()->getId(),
+                        $question->getVocabulary()->id,
+                        $status
+                    );
+                    $service = app()->make(TestService::class);
+                    $service->answer($dto);
+                    $this->bot->startConversation(new QuestionConversation());
+                } else {
+                    $this->askQuestion($questionTemplate, $wrongTimes, $question);
                 }
             }
-        );
+        });
     }
 
     private function calculateAnsweringStatus(bool $isPass, int $wrongTimes, float $answerTime): int
