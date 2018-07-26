@@ -40,4 +40,11 @@ class BotManController extends Controller
     {
         $bot->startConversation(new QuestionConversation());
     }
+
+    public function help(BotMan $bot)
+    {
+        $helpMessage = Storage::disk('local')->get('helpMessage.txt');
+
+        $bot->reply($helpMessage);
+    }
 }
