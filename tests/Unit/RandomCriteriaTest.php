@@ -45,7 +45,7 @@ class RandomCriteriaTest extends TestCase
             'easiest_factor' => 2.5
         ]);
 
-        $vocabulary = (new VocabularyRepositoryEloquent(app()))->getByCriteria(new RandomCriteria());
+        $vocabulary = (new VocabularyRepositoryEloquent(app()))->getByCriteria(new RandomCriteria(1));
         $this->assertInstanceOf(Collection::class, $vocabulary);
     }
 
