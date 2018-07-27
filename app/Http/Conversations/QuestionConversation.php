@@ -67,7 +67,8 @@ class QuestionConversation extends Conversation
                 $pass = $v === 'pass';
                 $wrongTimes += !$correct;
 
-                $this->say($this->getReply($pass, $correct));
+                $this->replyAnswerStatus($pass, $correct);
+
 
                 if ($correct || $wrongTimes > $this->maxWroungTimes || $pass) {
                     $status = $this->calculateAnsweringStatus($pass, $wrongTimes, $answerTime);
@@ -93,14 +94,15 @@ class QuestionConversation extends Conversation
         return (microtime(true) - $startAskingTime) * 1000;
     }
 
-    private function getReply(bool $pass, bool $correct): string
+    private function replyAnswerStatus(bool $pass, bool $correct): void
     {
         if ($pass) {
-            return '跳過';
+            $this->say('跳過');
         } elseif ($correct) {
-            return '答對惹';
+            $this->say('答對惹');
+        } else {
+            $this->say('答錯惹');
         }
-        return '答錯惹';
     }
 
     private function calculateAnsweringStatus(bool $isPass, int $wrongTimes, float $answerTime): int
