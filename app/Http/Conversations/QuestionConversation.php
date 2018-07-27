@@ -61,8 +61,7 @@ class QuestionConversation extends Conversation
             $question
         ) {
             if ($answer->isInteractiveMessageReply()) {
-                // convert microsecond to millisecond, because ANSWER_MIN/MAX_TIME is set by millisecond
-                $answerTime = (microtime(true) - $startAskingTime) * 1000;
+                $answerTime = $this->calculateAnswerTime($startAskingTime);
                 $v = $answer->getValue();
                 $correct = $v == $question->getAnswer();
                 $pass = $v === 'pass';
@@ -86,6 +85,12 @@ class QuestionConversation extends Conversation
                 }
             }
         });
+    }
+
+    private function calculateAnswerTime($startAskingTime): float
+    {
+        // convert microsecond to millisecond, because ANSWER_MIN/MAX_TIME is set by millisecond
+        return (microtime(true) - $startAskingTime) * 1000;
     }
 
     private function getReply(bool $pass, bool $correct): string
