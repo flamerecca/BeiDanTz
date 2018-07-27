@@ -5,24 +5,14 @@ namespace App\Http\Conversations;
 use App\DTO\AnswerDTO;
 use App\DTO\QuestionDTO;
 use App\Services\TestService;
-use App\Services\TestServiceInterface;
 use App\Services\UserService;
-use BotMan\BotMan\Interfaces\UserInterface;
 use BotMan\BotMan\Messages\Conversations\Conversation;
 use BotMan\BotMan\Messages\Incoming\Answer;
 use BotMan\BotMan\Messages\Outgoing\Actions\Button;
 use BotMan\BotMan\Messages\Outgoing\Question;
-use Doctrine\DBAL\Types\ConversionException;
-use Illuminate\Support\Facades\Log;
 
 class QuestionConversation extends Conversation
 {
-    /**
-     * 最大能錯誤的次數，超過這個次數後進入到下一題
-     * @var int
-     */
-    private $maxWroungTimes = 1;
-
     /**
      * @var QuestionDTO
      */
@@ -37,6 +27,12 @@ class QuestionConversation extends Conversation
      * @var int
      */
     protected $wrongTimes = 0;
+
+    /**
+     * 最大能錯誤的次數，超過這個次數後進入到下一題
+     * @var int
+     */
+    private $maxWroungTimes = 1;
 
     /**
      * Start the conversation.
@@ -82,16 +78,7 @@ class QuestionConversation extends Conversation
 
                 $toNextQuestion = $correct || $this->wrongTimes > $this->maxWroungTimes || $pass;
                 if ($toNextQuestion) {
-                    $status = $this->calculateAnsweringStatus($pass, $answerTime);
-
-                    $dto = new AnswerDTO(
-                        $this->bot->getUser()->getId(),
-                        $this->question->getVocabulary()->id,
-                        $status
-                    );
-                    $service = app()->make(TestService::class);
-                    $service->answer($dto);
-                    $this->bot->startConversation(new QuestionConversation());
+                    $this->nextQuestion($pass, $answerTime);
                 } else {
                     $this->askQuestion();
                 }
@@ -116,12 +103,26 @@ class QuestionConversation extends Conversation
         }
     }
 
+    private function nextQuestion($pass, $answerTime): void
+    {
+        $status = $this->calculateAnsweringStatus($pass, $answerTime);
+
+        $dto = new AnswerDTO(
+            $this->bot->getUser()->getId(),
+            $this->question->getVocabulary()->id,
+            $status
+        );
+        $service = app()->make(TestService::class);
+        $service->answer($dto);
+        $this->bot->startConversation(new QuestionConversation());
+    }
+
+
     private function calculateAnsweringStatus(bool $isPass, float $answerTime): int
     {
         if ($isPass) {
             return AnswerDTO::PASS;
-        }
-        if ($this->wrongTimes == 0) {
+        }if ($this->wrongTimes == 0) {
             $min = config('botman.config.answer_min_time');
             $max = config('botman.config.answer_max_time');
             if ($answerTime < $min) {
