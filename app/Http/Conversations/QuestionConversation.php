@@ -24,6 +24,21 @@ class QuestionConversation extends Conversation
     private $maxWroungTimes = 1;
 
     /**
+     * @var QuestionDTO
+     */
+    protected $question;
+
+    /**
+     * @var Question
+     */
+    protected $template;
+
+    /**
+     * @var int
+     */
+    protected $wrongTimes = 0;
+
+    /**
      * Start the conversation.
      *
      * @return mixed
@@ -34,8 +49,9 @@ class QuestionConversation extends Conversation
         $userService = app()->make(UserService::class);
         $userId = $this->bot->getUser()->getId();
         $user = $userService->fistOrCreateUser($userId);
-        $questionDTO = $testService->getQuestion($user);
-        $options = $questionDTO->getOptions();
+        $this->question = $testService->getQuestion($user);
+
+        $options = $this->question->getOptions();
         $buttons = collect($options)
             ->map(function ($option, $idx) {
                 // each button value must be difference, otherwise telegram can't display template
@@ -44,45 +60,40 @@ class QuestionConversation extends Conversation
             ->push(Button::create('pass')->value('pass'))
             ->toArray();
 
-        $vocabulary = $questionDTO->getVocabulary();
-        $questionTemplate = Question::create($vocabulary->content)->addButtons($buttons);
+        $vocabulary = $this->question->getVocabulary();
+        $this->template = Question::create($vocabulary->content)->addButtons($buttons);
 
-        return $this->askQuestion($questionTemplate, 0, $questionDTO);
+        return $this->askQuestion();
     }
 
-    private function askQuestion(Question $questionTemplate, int $wrongTimes, QuestionDTO $question)
+    private function askQuestion()
     {
         $startAskingTime = microtime(true);
 
-        $this->ask($questionTemplate, function (Answer $answer) use (
-            $questionTemplate,
-            $wrongTimes,
-            $startAskingTime,
-            $question
-        ) {
+        $this->ask($this->template, function (Answer $answer) use ($startAskingTime) {
             if ($answer->isInteractiveMessageReply()) {
                 $answerTime = $this->calculateAnswerTime($startAskingTime);
                 $v = $answer->getValue();
-                $correct = $v == $question->getAnswer();
+                $correct = $v == $this->question->getAnswer();
                 $pass = $v === 'pass';
-                $wrongTimes += !$correct;
+                $this->wrongTimes += !$correct;
 
                 $this->replyAnswerStatus($pass, $correct);
 
-                $toNextQuestion = $correct || $wrongTimes > $this->maxWroungTimes || $pass;
+                $toNextQuestion = $correct || $this->wrongTimes > $this->maxWroungTimes || $pass;
                 if ($toNextQuestion) {
-                    $status = $this->calculateAnsweringStatus($pass, $wrongTimes, $answerTime);
+                    $status = $this->calculateAnsweringStatus($pass, $answerTime);
 
                     $dto = new AnswerDTO(
                         $this->bot->getUser()->getId(),
-                        $question->getVocabulary()->id,
+                        $this->question->getVocabulary()->id,
                         $status
                     );
                     $service = app()->make(TestService::class);
                     $service->answer($dto);
                     $this->bot->startConversation(new QuestionConversation());
                 } else {
-                    $this->askQuestion($questionTemplate, $wrongTimes, $question);
+                    $this->askQuestion();
                 }
             }
         });
@@ -105,12 +116,12 @@ class QuestionConversation extends Conversation
         }
     }
 
-    private function calculateAnsweringStatus(bool $isPass, int $wrongTimes, float $answerTime): int
+    private function calculateAnsweringStatus(bool $isPass, float $answerTime): int
     {
         if ($isPass) {
             return AnswerDTO::PASS;
         }
-        if ($wrongTimes == 0) {
+        if ($this->wrongTimes == 0) {
             $min = config('botman.config.answer_min_time');
             $max = config('botman.config.answer_max_time');
             if ($answerTime < $min) {
@@ -122,7 +133,7 @@ class QuestionConversation extends Conversation
 
             return AnswerDTO::CORRECT_OVER_MAX_TIME;
         }
-        if ($wrongTimes == 1) {
+        if ($this->wrongTimes == 1) {
             return AnswerDTO::WRONG_ONCE;
         }
         return AnswerDTO::WRONG_TWICE;
