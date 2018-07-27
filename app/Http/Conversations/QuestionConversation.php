@@ -69,8 +69,8 @@ class QuestionConversation extends Conversation
 
                 $this->replyAnswerStatus($pass, $correct);
 
-
-                if ($correct || $wrongTimes > $this->maxWroungTimes || $pass) {
+                $toNextQuestion = $correct || $wrongTimes > $this->maxWroungTimes || $pass;
+                if ($toNextQuestion) {
                     $status = $this->calculateAnsweringStatus($pass, $wrongTimes, $answerTime);
 
                     $dto = new AnswerDTO(
