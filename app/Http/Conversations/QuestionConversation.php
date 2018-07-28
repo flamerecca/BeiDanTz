@@ -32,8 +32,8 @@ class QuestionConversation extends Conversation
      * 最大能錯誤的次數，超過這個次數後進入到下一題
      * @var int
      */
-    private $maxWroungTimes = 1;
-
+    private $maxWrongTimes = 1;
+    
     /**
      * Start the conversation.
      *
@@ -76,7 +76,7 @@ class QuestionConversation extends Conversation
 
                 $this->replyAnswerStatus($pass, $correct);
 
-                $toNextQuestion = $correct || $this->wrongTimes > $this->maxWroungTimes || $pass;
+                $toNextQuestion = $correct || $this->wrongTimes > $this->maxWrongTimes || $pass;
                 if ($toNextQuestion) {
                     $this->nextQuestion($pass, $answerTime);
                 } else {
