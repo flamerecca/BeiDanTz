@@ -8,18 +8,13 @@
 
 namespace Tests\Unit;
 
-use App\Criteria\RandomCriteria;
 use App\Criteria\TodayVocabulariesCriteria;
 use App\Criteria\WrongAnswerCriteria;
 use App\DTO\QuestionDTO;
 use App\Entities\TelegramUser;
 use App\Entities\Vocabulary;
-use App\Repositories\TelegramUserRepository;
-use App\Repositories\TelegramUserRepositoryEloquent;
-use App\Repositories\VocabularyRepository;
 use App\Repositories\VocabularyRepositoryEloquent;
 use App\Services\TestService;
-use Mockery;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
