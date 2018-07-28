@@ -14,7 +14,7 @@ class AddCorrectTimesToTelegramUserVocabularyTable extends Migration
     public function up()
     {
         Schema::table('telegram_user_vocabulary', function (Blueprint $table) {
-            $table->integer('correct_times')->comment('單字正確次數');
+            $table->unsignedInteger('correct_times')->default(0)->comment('單字正確次數');
         });
     }
 
