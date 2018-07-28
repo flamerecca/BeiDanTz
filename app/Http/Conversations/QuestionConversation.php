@@ -122,7 +122,7 @@ class QuestionConversation extends Conversation
     {
         if ($isPass) {
             return AnswerDTO::PASS;
-        }if ($this->wrongTimes == 0) {
+        }if ($this->wrongTimes === 0) {
             $min = config('botman.config.answer_min_time');
             $max = config('botman.config.answer_max_time');
             if ($answerTime < $min) {
