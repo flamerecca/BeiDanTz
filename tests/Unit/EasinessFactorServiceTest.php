@@ -22,20 +22,20 @@ class EasinessFactorServiceTest extends TestCase
 
     public function testNewEasinessFactorIsCorrect(): void
     {
-        $newEasinessFactor = $this->easinessFactorService->getNewEasinessFactor('2.500', 0);
+        $newEasinessFactor = $this->easinessFactorService->calculateNewEasinessFactor('2.500', 0);
         $this->assertEquals('1.700', $newEasinessFactor);
     }
 
     public function testMinimumNewEasinessFactorIsOnePointThree()
     {
-        $newEasinessFactor = $this->easinessFactorService->getNewEasinessFactor('0', 0);
+        $newEasinessFactor = $this->easinessFactorService->calculateNewEasinessFactor('0', 0);
         $this->assertEquals('1.300', $newEasinessFactor);
     }
 
     public function testIfOldEasinessFactorIsNotStringShouldThrowException()
     {
         $this->expectException(\TypeError::class);
-        $this->easinessFactorService->getNewEasinessFactor( [], 0);
+        $this->easinessFactorService->calculateNewEasinessFactor( [], 0);
     }
 
     public function testIfOldEasinessFactorIsNotNumericShouldThrowException()
@@ -43,13 +43,13 @@ class EasinessFactorServiceTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('easiness factor is not numeric');
 
-        $this->easinessFactorService->getNewEasinessFactor('aaa', 0);
+        $this->easinessFactorService->calculateNewEasinessFactor('aaa', 0);
     }
 
     public function testIfAnswerStatusIsNotNumberShouldThrowException()
     {
         $this->expectException(\TypeError::class);
-        $this->easinessFactorService->getNewEasinessFactor('0', 'aa');
+        $this->easinessFactorService->calculateNewEasinessFactor('0', 'aa');
     }
 
     public function testIfOldEasinessFactorIsTooBig()
@@ -57,7 +57,7 @@ class EasinessFactorServiceTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('easiness factor is too big');
 
-        $this->easinessFactorService->getNewEasinessFactor(
+        $this->easinessFactorService->calculateNewEasinessFactor(
             '99999999999999999999999999',
             0
         );

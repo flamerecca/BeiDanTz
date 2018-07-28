@@ -20,7 +20,7 @@ class EasinessFactorService
      * @param int $answerStatus
      * @return string
      */
-    public function getNewEasinessFactor(string $easinessFactor, int $answerStatus):string
+    public function calculateNewEasinessFactor(string $easinessFactor, int $answerStatus):string
     {
         if (!is_numeric($easinessFactor)) {
             throw new \InvalidArgumentException('easiness factor is not numeric');
