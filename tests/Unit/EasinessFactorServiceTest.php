@@ -62,9 +62,4 @@ class EasinessFactorServiceTest extends TestCase
             0
         );
     }
-
-    protected function tearDown()
-    {
-        unset($this->easinessFactorService);
-    }
 }

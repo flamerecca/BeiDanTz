@@ -33,7 +33,6 @@ class EasinessFactorService
         $change = (string)(0.1 - (5 - $answerStatus) * (0.08 + (5 - $answerStatus) * 0.02));
         $newEasinessFactor = bcadd($easinessFactor, $change, 3);
 
-        // 如果新數值小於 1.3，則回傳 1.3
         if (bccomp($newEasinessFactor, '1.3') === -1) {
             return '1.300';
         }

@@ -14,7 +14,6 @@ use App\Criteria\WrongAnswerCriteria;
 use App\DTO\AnswerDTO;
 use App\DTO\QuestionDTO;
 use App\Entities\TelegramUser;
-use App\Entities\Vocabulary;
 use App\Repositories\TelegramUserRepository;
 use App\Repositories\VocabularyRepository;
 
