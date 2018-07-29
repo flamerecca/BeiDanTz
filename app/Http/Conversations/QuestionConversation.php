@@ -8,6 +8,7 @@ use App\Services\TestService;
 use App\Services\UserService;
 use BotMan\BotMan\Messages\Conversations\Conversation;
 use BotMan\BotMan\Messages\Incoming\Answer;
+use BotMan\BotMan\Messages\Incoming\IncomingMessage;
 use BotMan\BotMan\Messages\Outgoing\Actions\Button;
 use BotMan\BotMan\Messages\Outgoing\Question;
 
@@ -32,7 +33,7 @@ class QuestionConversation extends Conversation
      * 最大能錯誤的次數，超過這個次數後進入到下一題
      * @var int
      */
-    private $maxWroungTimes = 1;
+    private $maxWrongTimes = 1;
 
     /**
      * Start the conversation.
@@ -76,7 +77,7 @@ class QuestionConversation extends Conversation
 
                 $this->replyAnswerStatus($pass, $correct);
 
-                $toNextQuestion = $correct || $this->wrongTimes > $this->maxWroungTimes || $pass;
+                $toNextQuestion = $correct || $this->wrongTimes > $this->maxWrongTimes || $pass;
                 if ($toNextQuestion) {
                     $this->nextQuestion($pass, $answerTime);
                 } else {
@@ -122,21 +123,34 @@ class QuestionConversation extends Conversation
     {
         if ($isPass) {
             return AnswerDTO::PASS;
-        }if ($this->wrongTimes === 0) {
+        } elseif ($this->wrongTimes === 0) {
             $min = config('botman.config.answer_min_time');
             $max = config('botman.config.answer_max_time');
             if ($answerTime < $min) {
                 return AnswerDTO::CORRECT_LESS_MIN_TIME;
-            }
-            if ($answerTime >= $min && $answerTime < $max) {
+            } elseif ($answerTime >= $min && $answerTime < $max) {
                 return AnswerDTO::CORRECT_BETWEEN_MIN_MAX_TIME;
             }
-
             return AnswerDTO::CORRECT_OVER_MAX_TIME;
-        }
-        if ($this->wrongTimes == 1) {
+        } elseif ($this->wrongTimes == 1) {
             return AnswerDTO::WRONG_ONCE;
         }
         return AnswerDTO::WRONG_TWICE;
+    }
+
+    /**
+     * execute before run, use to decide skip or not
+     * if you want to know more detail, please visit \BotMan\BotMan\Traits\HandlesConversations
+     *
+     * @param IncomingMessage $message
+     * @return bool
+     */
+    public function skipsConversation(IncomingMessage $message): bool
+    {
+        if ($message->getExtras('skip')) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
