@@ -56,8 +56,7 @@ class QuestionConversation extends Conversation
             ->push(Button::create('pass')->value('pass'))
             ->toArray();
 
-        $vocabulary = $this->question->getVocabulary();
-        $this->template = Question::create($vocabulary->content)->addButtons($buttons);
+        $this->template = Question::create($this->question->getContent())->addButtons($buttons);
 
         return $this->askQuestion();
     }
@@ -109,7 +108,7 @@ class QuestionConversation extends Conversation
 
         $dto = new AnswerDTO(
             $this->bot->getUser()->getId(),
-            $this->question->getVocabulary()->id,
+            $this->question->getVocabularyId(),
             $status
         );
         $service = app()->make(TestService::class);

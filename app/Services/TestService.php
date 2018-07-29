@@ -64,7 +64,8 @@ class TestService implements TestServiceInterface
 
 
         return new QuestionDTO(
-            $vocabulary,
+            $vocabulary->id,
+            $vocabulary->content,
             $options,
             $answer
         );
