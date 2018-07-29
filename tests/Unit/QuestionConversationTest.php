@@ -6,9 +6,11 @@ use App\DTO\AnswerDTO;
 use App\DTO\QuestionDTO;
 use App\Entities\TelegramUser;
 use App\Entities\Vocabulary;
+use App\Http\Conversations\QuestionConversation;
 use App\Services\TestService;
 use App\Services\TestServiceInterface;
 use App\Services\UserService;
+use BotMan\BotMan\Messages\Incoming\IncomingMessage;
 use BotMan\BotMan\Messages\Outgoing\Actions\Button;
 use BotMan\BotMan\Messages\Outgoing\Question;
 use Mockery;
@@ -245,5 +247,32 @@ class QuestionConversationTest extends TestCase
             ->receivesInteractiveMessage('pass')
             ->assertReply('跳過')
             ->assertTemplate($this->questionTemplate2, true);
+    }
+
+    /**
+     * @test
+     */
+    public function 測試當IncomingMessage有skip的時候，skipsConversation會回傳true()
+    {
+        $message = new IncomingMessage('', '', '');
+        $message->addExtras('skip', true);
+        $conversation = app()->make(QuestionConversation::class);
+
+        $actual = $conversation->skipsConversation($message);
+
+        $this->assertTrue($actual);
+    }
+
+    /**
+     * @test
+     */
+    public function 測試當IncomingMessage沒有skip的時候，skipsConversation會回傳false()
+    {
+        $message = new IncomingMessage('', '', '');
+        $conversation = app()->make(QuestionConversation::class);
+
+        $actual = $conversation->skipsConversation($message);
+
+        $this->assertFalse($actual);
     }
 }
