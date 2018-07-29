@@ -53,27 +53,24 @@ class QuestionConversationTest extends TestCase
         parent::setUp();
         $this->testServiceMock = Mockery::mock(TestServiceInterface::class);
         $userServiceStub = $this->createMock(UserService::class);
-        $user = new TelegramUser();
+        $user = new TelegramUser(['telegram_id' => 1]);
         $user->id = 1;
-        $user->telegram_id = 1;
         $userServiceStub->method('fistOrCreateUser')->willReturn($user);
         $this->app->instance(TestService::class, $this->testServiceMock);
         $this->app->instance(UserService::class, $userServiceStub);
 
-        $v1 = new Vocabulary([
-            'content' => 'test',
-            'answer' => '測試',
-            'easiest_factor' => 2.5,
-        ]);
-        $v1->id = 1;
-        $v2 = new Vocabulary([
-            'content' => 'question',
-            'answer' => '問題',
-            'easiest_factor' => 2.5,
-        ]);
-        $v2->id = 2;
-        $this->questionDTO1 = new QuestionDTO($v1, ['測試', '任務', '答案', '回應'], 0);
-        $this->questionDTO2 = new QuestionDTO($v2, ['任務', '問題', '答案', '回應'], 1);
+        $this->questionDTO1 = new QuestionDTO(
+            1,
+            'test',
+            ['測試', '任務', '答案', '回應'],
+            0
+        );
+        $this->questionDTO2 = new QuestionDTO(
+            2,
+            'question',
+            ['任務', '問題', '答案', '回應'],
+            1
+        );
 
         $this->questionTemplate1 = Question::create('test')
             ->addButtons([
@@ -136,7 +133,7 @@ class QuestionConversationTest extends TestCase
         $this->mockGetQuestionReturn([$this->questionDTO1, $this->questionDTO2]);
         $this->shouldReceiveAnswer(new AnswerDTO(
             $this->userId,
-            $this->questionDTO1->getVocabulary()->id,
+            $this->questionDTO1->getVocabularyId(),
             AnswerDTO::CORRECT_LESS_MIN_TIME
         ));
 
@@ -156,7 +153,7 @@ class QuestionConversationTest extends TestCase
         $this->mockGetQuestionReturn([$this->questionDTO1, $this->questionDTO2]);
         $this->shouldReceiveAnswer(new AnswerDTO(
             $this->userId,
-            $this->questionDTO1->getVocabulary()->id,
+            $this->questionDTO1->getVocabularyId(),
             AnswerDTO::CORRECT_BETWEEN_MIN_MAX_TIME
         ));
 
@@ -174,7 +171,7 @@ class QuestionConversationTest extends TestCase
         $this->mockGetQuestionReturn([$this->questionDTO1, $this->questionDTO2]);
         $this->shouldReceiveAnswer(new AnswerDTO(
             $this->userId,
-            $this->questionDTO1->getVocabulary()->id,
+            $this->questionDTO1->getVocabularyId(),
             AnswerDTO::CORRECT_OVER_MAX_TIME
         ));
 
@@ -192,7 +189,7 @@ class QuestionConversationTest extends TestCase
         $this->mockGetQuestionReturn([$this->questionDTO1, $this->questionDTO2]);
         $this->shouldReceiveAnswer(new AnswerDTO(
             $this->userId,
-            $this->questionDTO1->getVocabulary()->id,
+            $this->questionDTO1->getVocabularyId(),
             AnswerDTO::WRONG_ONCE
         ));
 
@@ -214,7 +211,7 @@ class QuestionConversationTest extends TestCase
         $this->mockGetQuestionReturn([$this->questionDTO1, $this->questionDTO2]);
         $this->shouldReceiveAnswer(new AnswerDTO(
             $this->userId,
-            $this->questionDTO1->getVocabulary()->id,
+            $this->questionDTO1->getVocabularyId(),
             AnswerDTO::WRONG_TWICE
         ));
 
@@ -237,7 +234,7 @@ class QuestionConversationTest extends TestCase
         $this->mockGetQuestionReturn([$this->questionDTO1, $this->questionDTO2]);
         $this->shouldReceiveAnswer(new AnswerDTO(
             $this->userId,
-            $this->questionDTO1->getVocabulary()->id,
+            $this->questionDTO1->getVocabularyId(),
             AnswerDTO::PASS
         ));
 

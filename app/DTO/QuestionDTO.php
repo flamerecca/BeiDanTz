@@ -8,8 +8,6 @@
 
 namespace App\DTO;
 
-use App\Entities\Vocabulary;
-
 /**
  * 題目的資料結構，供給 bot render 考題
  * Class QuestionDTO
@@ -19,9 +17,14 @@ use App\Entities\Vocabulary;
 class QuestionDTO
 {
     /**
-     * @var Vocabulary 題目單字物件
+     * @var int
      */
-    private $vocabulary;
+    private $vocabularyId;
+
+    /**
+     * @var string
+     */
+    private $content;
 
     /**
      * @var array 題目選項，為字串的陣列
@@ -33,19 +36,28 @@ class QuestionDTO
      */
     private $answer;
 
-    public function __construct(Vocabulary $vocabulary, array $options, int $answer)
+    public function __construct(int $vocabularyId, string $content, array $options, int $answer)
     {
-        $this->vocabulary = $vocabulary;
+        $this->vocabularyId = $vocabularyId;
+        $this->content = $content;
         $this->options = $options;
         $this->answer = $answer;
     }
 
     /**
-     * @return Vocabulary
+     * @return int
      */
-    public function getVocabulary(): Vocabulary
+    public function getVocabularyId(): int
     {
-        return $this->vocabulary;
+        return $this->vocabularyId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getContent(): string
+    {
+        return $this->content;
     }
 
     /**
