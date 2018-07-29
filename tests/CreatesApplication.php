@@ -21,13 +21,13 @@ trait CreatesApplication
         $app = require __DIR__.'/../bootstrap/app.php';
 
         DriverManager::loadDriver(ProxyDriver::class);
-        $fakeDriver = new FakeDriver();
-        ProxyDriver::setInstance($fakeDriver);
+        $this->fakeDriver = new FakeDriver();
+        ProxyDriver::setInstance($this->fakeDriver);
 
         $app->make(Kernel::class)->bootstrap();
 
         $this->botman = $app->make('botman');
-        $this->bot = new BotManTester($this->botman, $fakeDriver, $this);
+        $this->bot = new BotManTester($this->botman, $this->fakeDriver, $this);
 
         Hash::driver('bcrypt')->setRounds(4);
 

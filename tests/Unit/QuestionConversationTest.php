@@ -9,13 +9,10 @@ use App\Entities\Vocabulary;
 use App\Services\TestService;
 use App\Services\TestServiceInterface;
 use App\Services\UserService;
-use BotMan\BotMan\Messages\Incoming\Answer;
 use BotMan\BotMan\Messages\Outgoing\Actions\Button;
 use BotMan\BotMan\Messages\Outgoing\Question;
 use Mockery;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class QuestionConversationTest extends TestCase
 {
@@ -202,8 +199,8 @@ class QuestionConversationTest extends TestCase
             ->assertTemplate($this->questionTemplate1, true)
             ->receivesInteractiveMessage($this->questionDTO1->getAnswer() + 1)
             ->assertReply('答錯惹')
-            ->assertTemplate($this->questionTemplate1, true)
-            ->receivesInteractiveMessage($this->questionDTO1->getAnswer())
+            ->assertTemplate($this->questionTemplate1, true);
+        $this->receivesInteractiveMessageWithPayload($this->questionDTO1->getAnswer(), ['message_id' => 2])
             ->assertReply('答對惹');
     }
 
@@ -224,8 +221,8 @@ class QuestionConversationTest extends TestCase
             ->assertTemplate($this->questionTemplate1, true)
             ->receivesInteractiveMessage($this->questionDTO1->getAnswer() + 1)
             ->assertReply('答錯惹')
-            ->assertTemplate($this->questionTemplate1, true)
-            ->receivesInteractiveMessage($this->questionDTO1->getAnswer() + 1)
+            ->assertTemplate($this->questionTemplate1, true);
+        $this->receivesInteractiveMessageWithPayload($this->questionDTO1->getAnswer() + 1, ['message_id' => 2])
             ->assertReply('答錯惹')
             ->assertTemplate($this->questionTemplate2, true);
     }
