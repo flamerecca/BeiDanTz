@@ -8,6 +8,7 @@ use App\Services\TestService;
 use App\Services\UserService;
 use BotMan\BotMan\Messages\Conversations\Conversation;
 use BotMan\BotMan\Messages\Incoming\Answer;
+use BotMan\BotMan\Messages\Incoming\IncomingMessage;
 use BotMan\BotMan\Messages\Outgoing\Actions\Button;
 use BotMan\BotMan\Messages\Outgoing\Question;
 
@@ -135,5 +136,21 @@ class QuestionConversation extends Conversation
             return AnswerDTO::WRONG_ONCE;
         }
         return AnswerDTO::WRONG_TWICE;
+    }
+
+    /**
+     * execute before run, use to decide skip or not
+     * if you want to know more detail, please visit \BotMan\BotMan\Traits\HandlesConversations
+     *
+     * @param IncomingMessage $message
+     * @return bool
+     */
+    public function skipsConversation(IncomingMessage $message): bool
+    {
+        if ($message->getExtras('skip')) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
