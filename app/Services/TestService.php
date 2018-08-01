@@ -8,9 +8,10 @@
 
 namespace App\Services;
 
+use App\Criteria\LimitCriteria;
 use App\Criteria\RandomCriteria;
 use App\Criteria\TodayVocabulariesCriteria;
-use App\Criteria\WrongAnswerCriteria;
+use App\Criteria\DifferentVocabularyCriteria;
 use App\DTO\AnswerDTO;
 use App\DTO\QuestionDTO;
 use App\Entities\TelegramUser;
@@ -81,8 +82,12 @@ class TestService implements TestServiceInterface
      */
     private function getOptions(Vocabulary $vocabulary, int $optionNumber): array
     {
-        return $this->vocabularyRepository
-            ->getByCriteria(new WrongAnswerCriteria($vocabulary, $optionNumber - 1))
+        $wrongAnswer = $this->vocabularyRepository
+            ->pushCriteria(new DifferentVocabularyCriteria($vocabulary))
+            ->pushCriteria(new LimitCriteria($optionNumber - 1))
+            ->all();
+
+        return collect($wrongAnswer)
             ->map(function ($vocabulary) {
                 return $vocabulary->answer;
             })
