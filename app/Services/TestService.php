@@ -55,7 +55,9 @@ class TestService implements TestServiceInterface
 
         $options = $this->vocabularyRepository
             ->getByCriteria(new WrongAnswerCriteria($vocabulary, 4))
-            ->map(function ($vocabulary) { return $vocabulary->answer; })
+            ->map(function ($vocabulary) {
+                return $vocabulary->answer;
+            })
             ->toArray();
 
 
