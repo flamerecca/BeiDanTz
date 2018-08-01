@@ -29,8 +29,6 @@ class DifferentVocabularyCriteria implements CriteriaInterface
      */
     public function apply($model, RepositoryInterface $repository)
     {
-        $model = $model->where('id', '!=', $this->vocabulary->id)
-            ->inRandomOrder();
-        return $model;
+        return $model->where('id', '!=', $this->vocabulary->id);
     }
 }
