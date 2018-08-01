@@ -8,12 +8,14 @@
 
 namespace App\Services;
 
+use App\Criteria\LimitCriteria;
 use App\Criteria\RandomCriteria;
 use App\Criteria\TodayVocabulariesCriteria;
-use App\Criteria\WrongAnswerCriteria;
+use App\Criteria\DifferentVocabularyCriteria;
 use App\DTO\AnswerDTO;
 use App\DTO\QuestionDTO;
 use App\Entities\TelegramUser;
+use App\Entities\Vocabulary;
 use App\Repositories\TelegramUserRepository;
 use App\Repositories\VocabularyRepository;
 
@@ -42,33 +44,56 @@ class TestService implements TestServiceInterface
     public function getQuestion(TelegramUser $telegramUser): QuestionDTO
     {
         // 找用戶是否有需要複習的單字
-        $vocabularies = $this->vocabularyRepository
-            ->getByCriteria(new TodayVocabulariesCriteria($telegramUser));
-        
-        if ($vocabularies->isEmpty()) {
-            $vocabulary = $this->vocabularyRepository
-                ->getByCriteria(new RandomCriteria(1))
-                ->first();
-        } else {
-            $vocabulary = $vocabularies->random();
-        }
+        $vocabulary = $this->getVocabulary($telegramUser);
 
-        $options = $this->vocabularyRepository
-            ->getByCriteria(new WrongAnswerCriteria($vocabulary, 4))
-            ->map(function ($vocabulary) { return $vocabulary->answer; })
-            ->toArray();
-
-
-        $answer = rand(0, 3);
-        $options[$answer] = $vocabulary->answer;
-
+        $optionNumber = 4;
+        $options = $this->getOptions($vocabulary, $optionNumber);
 
         return new QuestionDTO(
             $vocabulary->id,
             $vocabulary->content,
             $options,
-            $answer
+            $vocabulary->answer
         );
+    }
+
+    /**
+     * @param TelegramUser $telegramUser
+     * @return Vocabulary
+     */
+    private function getVocabulary(TelegramUser $telegramUser): Vocabulary
+    {
+        $vocabularies = $this->vocabularyRepository
+            ->getByCriteria(new TodayVocabulariesCriteria($telegramUser));
+
+        if ($vocabularies->isEmpty()) {
+            return $this->vocabularyRepository
+                ->pushCriteria(new RandomCriteria())
+                ->first();
+        }
+
+        return $vocabularies->random();
+    }
+
+    /**
+     * @param Vocabulary $vocabulary
+     * @param int $optionNumber
+     * @return array
+     */
+    private function getOptions(Vocabulary $vocabulary, int $optionNumber): array
+    {
+        $wrongAnswer = $this->vocabularyRepository
+            ->pushCriteria(new DifferentVocabularyCriteria($vocabulary))
+            ->pushCriteria(new LimitCriteria($optionNumber - 1))
+            ->all();
+
+        return collect($wrongAnswer)
+            ->map(function ($vocabulary) {
+                return $vocabulary->answer;
+            })
+            ->push($vocabulary->answer)
+            ->shuffle()
+            ->toArray();
     }
 
     /**

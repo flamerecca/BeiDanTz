@@ -32,11 +32,11 @@ class QuestionDTO
     private $options;
 
     /**
-     * @var int 解答，為選項 index
+     * @var string 解答
      */
     private $answer;
 
-    public function __construct(int $vocabularyId, string $content, array $options, int $answer)
+    public function __construct(int $vocabularyId, string $content, array $options, string $answer)
     {
         $this->vocabularyId = $vocabularyId;
         $this->content = $content;
@@ -69,9 +69,9 @@ class QuestionDTO
     }
 
     /**
-     * @return int
+     * @return string
      */
-    public function getAnswer(): int
+    public function getAnswer(): string
     {
         return $this->answer;
     }

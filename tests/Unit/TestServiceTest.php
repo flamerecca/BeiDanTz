@@ -8,8 +8,9 @@
 
 namespace Tests\Unit;
 
+use App\Criteria\LimitCriteria;
 use App\Criteria\TodayVocabulariesCriteria;
-use App\Criteria\WrongAnswerCriteria;
+use App\Criteria\DifferentVocabularyCriteria;
 use App\DTO\QuestionDTO;
 use App\Entities\TelegramUser;
 use App\Entities\Vocabulary;
@@ -77,18 +78,24 @@ class TestServiceTest extends TestCase
 
         $mock = $this->createMock(VocabularyRepositoryEloquent::class);
         $mock->method('getByCriteria')->withConsecutive(
-            $this->isInstanceOf(TodayVocabulariesCriteria::class),
-            $this->isInstanceOf(WrongAnswerCriteria::class)
+            $this->isInstanceOf(TodayVocabulariesCriteria::class)
         )->will($this->onConsecutiveCalls(
-            collect([$vocabulary]),
-            collect($wrongAnswers)
+            collect([$vocabulary])
+        ));
+
+        $mock->method('pushCriteria')->withConsecutive(
+            $this->isInstanceOf(DifferentVocabularyCriteria::class),
+            $this->isInstanceOf(LimitCriteria::class)
+        )->will($this->onConsecutiveCalls(
+            $mock,
+            $wrongAnswers
         ));
 
         app()->instance(VocabularyRepositoryEloquent::class, $mock);
 
         $service = app()->make(TestService::class);
         $q = $service->getQuestion($this->telegramUser);
-        $this->assertEquals($vocabulary->answer, $q->getOptions()[$q->getAnswer()]);
+        $this->assertEquals($vocabulary->answer, $q->getAnswer());
     }
 
     public function testIfUserHasNoVocabularyGetQuestionShouldWorkProperly()

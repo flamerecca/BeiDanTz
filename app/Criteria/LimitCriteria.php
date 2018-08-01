@@ -6,12 +6,17 @@ use Prettus\Repository\Contracts\CriteriaInterface;
 use Prettus\Repository\Contracts\RepositoryInterface;
 
 /**
- * Class RandomCriteria.
+ * Class LimitCriteria.
  *
  * @package namespace App\Criteria;
  */
-class RandomCriteria implements CriteriaInterface
+class LimitCriteria implements CriteriaInterface
 {
+    private $number;
+    public function __construct(int $number)
+    {
+        $this->number = $number;
+    }
 
     /**
      * Apply criteria in query repository
@@ -23,6 +28,6 @@ class RandomCriteria implements CriteriaInterface
      */
     public function apply($model, RepositoryInterface $repository)
     {
-        return $model->inRandomOrder();
+        return $model->limit($this->number);
     }
 }
