@@ -48,14 +48,11 @@ class TestService implements TestServiceInterface
         $optionNumber = 4;
         $options = $this->getOptions($vocabulary, $optionNumber);
 
-        $answer = rand(0, $optionNumber - 1);
-        $options[$answer] = $vocabulary->answer;
-
         return new QuestionDTO(
             $vocabulary->id,
             $vocabulary->content,
             $options,
-            $answer
+            $vocabulary->answer
         );
     }
 
@@ -84,12 +81,17 @@ class TestService implements TestServiceInterface
      */
     private function getOptions(Vocabulary $vocabulary, int $optionNumber): array
     {
-        return $this->vocabularyRepository
+        $options = $this->vocabularyRepository
             ->getByCriteria(new WrongAnswerCriteria($vocabulary, $optionNumber))
             ->map(function ($vocabulary) {
                 return $vocabulary->answer;
             })
             ->toArray();
+
+        $answerIndex = rand(0, $optionNumber - 1);
+        $options[$answerIndex] = $vocabulary->answer;
+
+        return $options;
     }
 
     /**
