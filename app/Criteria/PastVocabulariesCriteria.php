@@ -7,27 +7,26 @@ use Prettus\Repository\Contracts\CriteriaInterface;
 use Prettus\Repository\Contracts\RepositoryInterface;
 
 /**
- * Class TodayVocabulariesCriteria.
+ * Class PastVocabulariesCriteria.
  *
  * @package namespace App\Criteria;
  */
-class TodayVocabulariesCriteria implements CriteriaInterface
+class PastVocabulariesCriteria implements CriteriaInterface
 {
     private $telegramUser;
 
     /**
-     * TodayVocabulariesCriteria constructor.
+     * PastVocabulariesCriteria constructor.
      * @param TelegramUser $telegramUser
      */
     public function __construct(TelegramUser $telegramUser)
     {
         $this->telegramUser = $telegramUser;
     }
-
     /**
      * Apply criteria in query repository
      *
-     * @param string $model
+     * @param string              $model
      * @param RepositoryInterface $repository
      *
      * @return mixed
@@ -37,7 +36,7 @@ class TodayVocabulariesCriteria implements CriteriaInterface
         return $model->with(['telegramUsers'])
             ->whereHas('telegramUsers', function ($query) {
                 $query->where('telegram_user_id', $this->telegramUser->id)
-                ->where('review_date', date('Y-m-d'));
+                    ->where('review_date', '<', date('Y-m-d'));
             });
     }
 }
