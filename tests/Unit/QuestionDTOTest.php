@@ -53,7 +53,7 @@ class QuestionDTOTest extends TestCase
     public function testGetAnswerShouldReturnInteger()
     {
         $this->assertInternalType(
-            'integer',
+            'string',
             $this->question->getAnswer()
         );
     }

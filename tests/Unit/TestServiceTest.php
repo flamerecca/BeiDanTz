@@ -88,7 +88,7 @@ class TestServiceTest extends TestCase
 
         $service = app()->make(TestService::class);
         $q = $service->getQuestion($this->telegramUser);
-        $this->assertEquals($vocabulary->answer, $q->getOptions()[$q->getAnswer()]);
+        $this->assertEquals($vocabulary->answer, $q->getAnswer());
     }
 
     public function testIfUserHasNoVocabularyGetQuestionShouldWorkProperly()
