@@ -81,17 +81,14 @@ class TestService implements TestServiceInterface
      */
     private function getOptions(Vocabulary $vocabulary, int $optionNumber): array
     {
-        $options = $this->vocabularyRepository
-            ->getByCriteria(new WrongAnswerCriteria($vocabulary, $optionNumber))
+        return $this->vocabularyRepository
+            ->getByCriteria(new WrongAnswerCriteria($vocabulary, $optionNumber - 1))
             ->map(function ($vocabulary) {
                 return $vocabulary->answer;
             })
+            ->push($vocabulary->answer)
+            ->shuffle()
             ->toArray();
-
-        $answerIndex = rand(0, $optionNumber - 1);
-        $options[$answerIndex] = $vocabulary->answer;
-
-        return $options;
     }
 
     /**
