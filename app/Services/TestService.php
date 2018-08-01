@@ -41,6 +41,7 @@ class TestService implements TestServiceInterface
      */
     public function getQuestion(TelegramUser $telegramUser): QuestionDTO
     {
+        $optionNumber = 4;
         // 找用戶是否有需要複習的單字
         $vocabularies = $this->vocabularyRepository
             ->getByCriteria(new TodayVocabulariesCriteria($telegramUser));
@@ -53,15 +54,16 @@ class TestService implements TestServiceInterface
             $vocabulary = $vocabularies->random();
         }
 
+
         $options = $this->vocabularyRepository
-            ->getByCriteria(new WrongAnswerCriteria($vocabulary, 4))
+            ->getByCriteria(new WrongAnswerCriteria($vocabulary, $optionNumber))
             ->map(function ($vocabulary) {
                 return $vocabulary->answer;
             })
             ->toArray();
 
 
-        $answer = rand(0, 3);
+        $answer = rand(0, $optionNumber - 1);
         $options[$answer] = $vocabulary->answer;
 
 
