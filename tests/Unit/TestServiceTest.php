@@ -325,4 +325,56 @@ class TestServiceTest extends TestCase
             'correct_times' => 6,
         ]);
     }
+
+    public function testAnswerWrongShouldNotOverwriteOtherVocabulary()
+    {
+        $vocabularyId = 3;
+        $testService = app()->make(TestService::class);
+        $answerDTO = new AnswerDTO(
+            $this->telegramUser->telegram_id,
+            $vocabularyId,
+            AnswerDTO::PASS
+        );
+        $this->telegramUser->vocabularies()->attach([
+            1 => [
+                'review_date' => '2018-01-01',
+                'easiest_factor' => 5.000,
+                'correct_times' => 10,
+            ]
+        ]);
+        $testService->answer($answerDTO);
+        $this->assertDatabaseHas('telegram_user_vocabulary', [
+            'telegram_user_id' => $this->telegramUser->telegram_id,
+            'vocabulary_id' => 1,
+            'review_date' => '2018-01-01',
+            'easiest_factor' => 5.000,
+            'correct_times' => 10,
+        ]);
+    }
+
+    public function testAnswerRightShouldNotOverwriteOtherVocabulary()
+    {
+        $vocabularyId = 3;
+        $testService = app()->make(TestService::class);
+        $answerDTO = new AnswerDTO(
+            $this->telegramUser->telegram_id,
+            $vocabularyId,
+            AnswerDTO::PASS
+        );
+        $this->telegramUser->vocabularies()->attach([
+            1 => [
+                'review_date' => '2018-01-01',
+                'easiest_factor' => 5.000,
+                'correct_times' => 10,
+            ]
+        ]);
+        $testService->answer($answerDTO);
+        $this->assertDatabaseHas('telegram_user_vocabulary', [
+            'telegram_user_id' => $this->telegramUser->telegram_id,
+            'vocabulary_id' => 1,
+            'review_date' => '2018-01-01',
+            'easiest_factor' => 5.000,
+            'correct_times' => 10,
+        ]);
+    }
 }

@@ -119,99 +119,71 @@ class TestService implements TestServiceInterface
     public function answer(AnswerDTO $answerDTO): void
     {
         $answeringStatus = $answerDTO->getAnsweringStatus();
+        $telegramUser = TelegramUser::find($answerDTO->getUserId());
+        $originVocabulary = Vocabulary::find($answerDTO->getVocabularyId());
+        $vocabulary = $telegramUser->vocabularies()
+            ->where('vocabulary_id', $answerDTO->getVocabularyId())
+            ->first();
+
+        if (is_null($vocabulary)) {
+            $correctTimes = 0;
+            $originEasiestFactor = (string)$originVocabulary->easiest_factor;
+        } else {
+            $correctTimes = (int)$vocabulary->pivot->correct_times;
+            $originEasiestFactor = (string)$vocabulary->pivot->easiest_factor;
+        }
+
+        if ($this->isRightAnswer($answeringStatus)) {
+            $correctTimes++;
+        } else {
+            $correctTimes = 0;
+        }
+
+        $reviewDate = $this->getReviewDate($originEasiestFactor, $correctTimes);
+
+        $telegramUser->vocabularies()->attach([
+            $answerDTO->getVocabularyId() => [
+                'review_date' => $reviewDate->format('Y-m-d'),
+                'easiest_factor' => $this->easinessFactorService
+                    ->calculateNewEasinessFactor(
+                        $originEasiestFactor,
+                        $answerDTO->getAnsweringStatus()
+                    ),
+                'correct_times' => $correctTimes,
+            ]
+        ]);
+    }
+
+    /**
+     * @param int $answeringStatus
+     * @return bool
+     */
+    private function isRightAnswer(int $answeringStatus)
+    {
         if ($answeringStatus === AnswerDTO::PASS
             || $answeringStatus === AnswerDTO::WRONG_TWICE
             || $answeringStatus === AnswerDTO::WRONG_ONCE
         ) {
-            $this->handleWrongAnswer($answerDTO);
-            return;
+            return false;
+        } else {
+            return true;
         }
-        $this->handleRightAnswer($answerDTO);
     }
 
-    private function handleWrongAnswer(AnswerDTO $answerDTO): void
-    {
-        $reviewDate = new \DateTime('tomorrow');
-
-        $telegramUser = TelegramUser::find($answerDTO->getUserId());
-        $originVocabulary = Vocabulary::find($answerDTO->getVocabularyId());
-        $vocabulary = $telegramUser->vocabularies()
-            ->where('vocabulary_id', $answerDTO->getVocabularyId())
-            ->first();
-
-        if (is_null($vocabulary)) {
-            $telegramUser->vocabularies()->attach([
-                $answerDTO->getVocabularyId() => [
-                    'review_date' => $reviewDate->format('Y-m-d'),
-                    'easiest_factor' => $this->easinessFactorService
-                        ->calculateNewEasinessFactor(
-                            (string)$originVocabulary->easiest_factor,
-                            $answerDTO->getAnsweringStatus()
-                        ),
-                    'correct_times' => 0,
-                ]
-            ]);
-            return;
-        }
-
-        $telegramUser->vocabularies()->sync([
-            $answerDTO->getVocabularyId() => [
-                'review_date' => $reviewDate->format('Y-m-d'),
-                'easiest_factor' => $this->easinessFactorService
-                    ->calculateNewEasinessFactor(
-                        $vocabulary->pivot->easiest_factor,
-                        $answerDTO->getAnsweringStatus()
-                    ),
-                'correct_times' => 0,
-            ]
-        ]);
-    }
-
-    private function handleRightAnswer(AnswerDTO $answerDTO): void
-    {
-        $telegramUser = TelegramUser::find($answerDTO->getUserId());
-        $originVocabulary = Vocabulary::find($answerDTO->getVocabularyId());
-        $vocabulary = $telegramUser->vocabularies()
-            ->where('vocabulary_id', $answerDTO->getVocabularyId())
-            ->first();
-
-        if (is_null($vocabulary)) {
-            $reviewDate = new \DateTime('today + 3 day');
-            $telegramUser->vocabularies()->attach([
-                $answerDTO->getVocabularyId() => [
-                    'review_date' => $reviewDate->format('Y-m-d'),
-                    'easiest_factor' => $this->easinessFactorService
-                        ->calculateNewEasinessFactor(
-                            (string)$originVocabulary->easiest_factor,
-                            $answerDTO->getAnsweringStatus()
-                        ),
-                    'correct_times' => 1,
-                ]
-            ]);
-            return;
-        }
-
-        $reviewDate = $this->getReviewDate(
-            (string)$vocabulary->pivot->easiest_factor,
-            (int)$vocabulary->pivot->correct_times
-        );
-        $telegramUser->vocabularies()->sync([
-            $answerDTO->getVocabularyId() => [
-                'review_date' => $reviewDate->format('Y-m-d'),
-                'easiest_factor' => $this->easinessFactorService
-                    ->calculateNewEasinessFactor(
-                        (string)$vocabulary->pivot->easiest_factor,
-                        $answerDTO->getAnsweringStatus()
-                    ),
-                'correct_times' => $vocabulary->pivot->correct_times + 1,
-            ]
-        ]);
-    }
-
+    /**
+     * @param string $easiestFactor
+     * @param int $correctTimes
+     * @return \DateTime
+     */
     private function getReviewDate(string $easiestFactor, int $correctTimes): \DateTime
     {
         $interval = 3;
-        for ($i = 0; $i < $correctTimes; $i++) {
+
+        if ($correctTimes === 0) {
+            return new \DateTime('tomorrow');
+        }
+
+        for ($i = 0; $i < $correctTimes - 1; $i++) {
             $interval = bcmul($interval, $easiestFactor, 3);
         }
         // 無條件捨去
