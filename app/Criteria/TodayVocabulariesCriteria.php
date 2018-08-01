@@ -30,11 +30,10 @@ class TodayVocabulariesCriteria implements CriteriaInterface
      */
     public function apply($model, RepositoryInterface $repository)
     {
-        $model = $model->with(['telegramUsers'])
+        return $model->with(['telegramUsers'])
             ->whereHas('telegramUsers', function ($query) {
                 $query->where('telegram_user_id', $this->telegramUser->id)
                 ->where('review_date', date('Y-m-d'));
             });
-        return $model;
     }
 }
