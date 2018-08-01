@@ -126,22 +126,22 @@ class TestService implements TestServiceInterface
             ->first();
 
         if (is_null($vocabulary)) {
-            $correctTimes = 0;
-            $originEasiestFactor = (string)$originVocabulary->easiest_factor;
+            $continuingCorrectTimes = 0;
+            $originEasiestFactor = $originVocabulary->easiest_factor;
         } else {
-            $correctTimes = (int)$vocabulary->pivot->correct_times;
-            $originEasiestFactor = (string)$vocabulary->pivot->easiest_factor;
+            $continuingCorrectTimes = $vocabulary->pivot->continuing_correct_times;
+            $originEasiestFactor = $vocabulary->pivot->easiest_factor;
         }
 
         if ($this->isRightAnswer($answeringStatus)) {
-            $correctTimes++;
+            $continuingCorrectTimes++;
         } else {
-            $correctTimes = 0;
+            $continuingCorrectTimes = 0;
         }
 
-        $reviewDate = $this->getReviewDate($originEasiestFactor, $correctTimes);
+        $reviewDate = $this->getReviewDate($originEasiestFactor, $continuingCorrectTimes);
 
-        $telegramUser->vocabularies()->attach([
+        $telegramUser->vocabularies()->syncWithoutDetaching([
             $answerDTO->getVocabularyId() => [
                 'review_date' => $reviewDate->format('Y-m-d'),
                 'easiest_factor' => $this->easinessFactorService
@@ -149,16 +149,17 @@ class TestService implements TestServiceInterface
                         $originEasiestFactor,
                         $answerDTO->getAnsweringStatus()
                     ),
-                'correct_times' => $correctTimes,
+                'continuing_correct_times' => $continuingCorrectTimes,
             ]
         ]);
     }
 
     /**
+     * 根據 $answeringStatus 判斷回答是否正確
      * @param int $answeringStatus
      * @return bool
      */
-    private function isRightAnswer(int $answeringStatus)
+    private function isRightAnswer(int $answeringStatus): bool
     {
         if ($answeringStatus === AnswerDTO::PASS
             || $answeringStatus === AnswerDTO::WRONG_TWICE
@@ -171,6 +172,7 @@ class TestService implements TestServiceInterface
     }
 
     /**
+     * 根據 $easiestFactor 和 $correctTimes 判斷下次複習時間
      * @param string $easiestFactor
      * @param int $correctTimes
      * @return \DateTime

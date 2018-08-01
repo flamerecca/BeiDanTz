@@ -123,7 +123,7 @@ class TestServiceTest extends TestCase
             'vocabulary_id' => $vocabularyId,
             'review_date' => (new \DateTime('tomorrow'))->format('Y-m-d'),
             'easiest_factor' => 1.700,
-            'correct_times' => 0,
+            'continuing_correct_times' => 0,
         ]);
     }
 
@@ -142,7 +142,7 @@ class TestServiceTest extends TestCase
             'vocabulary_id' => $vocabularyId,
             'review_date' => (new \DateTime('tomorrow'))->format('Y-m-d'),
             'easiest_factor' => 1.960,
-            'correct_times' => 0,
+            'continuing_correct_times' => 0,
         ]);
     }
 
@@ -161,7 +161,7 @@ class TestServiceTest extends TestCase
             'vocabulary_id' => $vocabularyId,
             'review_date' => (new \DateTime('tomorrow'))->format('Y-m-d'),
             'easiest_factor' => 2.180,
-            'correct_times' => 0,
+            'continuing_correct_times' => 0,
         ]);
     }
 
@@ -180,7 +180,7 @@ class TestServiceTest extends TestCase
             'vocabulary_id' => $vocabularyId,
             'review_date' => (new \DateTime('today + 3 day'))->format('Y-m-d'),
             'easiest_factor' => 2.360,
-            'correct_times' => 1,
+            'continuing_correct_times' => 1,
         ]);
     }
 
@@ -199,7 +199,7 @@ class TestServiceTest extends TestCase
             'vocabulary_id' => $vocabularyId,
             'review_date' => (new \DateTime('today + 3 day'))->format('Y-m-d'),
             'easiest_factor' => 2.500,
-            'correct_times' => 1,
+            'continuing_correct_times' => 1,
         ]);
     }
 
@@ -218,7 +218,7 @@ class TestServiceTest extends TestCase
             'vocabulary_id' => $vocabularyId,
             'review_date' => (new \DateTime('today + 3 day'))->format('Y-m-d'),
             'easiest_factor' => 2.600,
-            'correct_times' => 1,
+            'continuing_correct_times' => 1,
         ]);
     }
 
@@ -235,7 +235,7 @@ class TestServiceTest extends TestCase
             $vocabularyId => [
                 'review_date' => '2018-01-01',
                 'easiest_factor' => 5.000,
-                'correct_times' => 10,
+                'continuing_correct_times' => 10,
             ]
         ]);
         $testService->answer($answerDTO);
@@ -244,7 +244,7 @@ class TestServiceTest extends TestCase
             'vocabulary_id' => $vocabularyId,
             'review_date' => (new \DateTime('tomorrow'))->format('Y-m-d'),
             'easiest_factor' => 4.200,
-            'correct_times' => 0,
+            'continuing_correct_times' => 0,
         ]);
     }
 
@@ -261,7 +261,7 @@ class TestServiceTest extends TestCase
             $vocabularyId => [
                 'review_date' => '2018-01-01',
                 'easiest_factor' => 5.000,
-                'correct_times' => 10,
+                'continuing_correct_times' => 10,
             ]
         ]);
         $testService->answer($answerDTO);
@@ -270,7 +270,7 @@ class TestServiceTest extends TestCase
             'vocabulary_id' => $vocabularyId,
             'review_date' => (new \DateTime('tomorrow'))->format('Y-m-d'),
             'easiest_factor' => 4.460,
-            'correct_times' => 0,
+            'continuing_correct_times' => 0,
         ]);
     }
 
@@ -287,7 +287,7 @@ class TestServiceTest extends TestCase
             $vocabularyId => [
                 'review_date' => '2018-01-01',
                 'easiest_factor' => 5.000,
-                'correct_times' => 10,
+                'continuing_correct_times' => 10,
             ]
         ]);
         $testService->answer($answerDTO);
@@ -296,7 +296,7 @@ class TestServiceTest extends TestCase
             'vocabulary_id' => $vocabularyId,
             'review_date' => (new \DateTime('tomorrow'))->format('Y-m-d'),
             'easiest_factor' => 4.680,
-            'correct_times' => 0,
+            'continuing_correct_times' => 0,
         ]);
     }
 
@@ -313,7 +313,7 @@ class TestServiceTest extends TestCase
             $vocabularyId => [
                 'review_date' => '2018-01-01',
                 'easiest_factor' => 2.900,
-                'correct_times' => 5,
+                'continuing_correct_times' => 5,
             ]
         ]);
         $testService->answer($answerDTO);
@@ -322,7 +322,59 @@ class TestServiceTest extends TestCase
             'vocabulary_id' => $vocabularyId,
             'review_date' => (new \DateTime('today + 615 day'))->format('Y-m-d'),
             'easiest_factor' => 2.760,
-            'correct_times' => 6,
+            'continuing_correct_times' => 6,
+        ]);
+    }
+
+    public function testAnswerNotFirstTimeCorrectBetweenMinMaxTime()
+    {
+        $vocabularyId = 3;
+        $testService = app()->make(TestService::class);
+        $answerDTO = new AnswerDTO(
+            $this->telegramUser->telegram_id,
+            $vocabularyId,
+            AnswerDTO::CORRECT_BETWEEN_MIN_MAX_TIME
+        );
+        $this->telegramUser->vocabularies()->attach([
+            $vocabularyId => [
+                'review_date' => '2018-01-01',
+                'easiest_factor' => 2.900,
+                'continuing_correct_times' => 5,
+            ]
+        ]);
+        $testService->answer($answerDTO);
+        $this->assertDatabaseHas('telegram_user_vocabulary', [
+            'telegram_user_id' => $this->telegramUser->telegram_id,
+            'vocabulary_id' => $vocabularyId,
+            'review_date' => (new \DateTime('today + 615 day'))->format('Y-m-d'),
+            'easiest_factor' => 2.900,
+            'continuing_correct_times' => 6,
+        ]);
+    }
+
+    public function testAnswerNotFirstTimeCorrectLessMinTime()
+    {
+        $vocabularyId = 2;
+        $testService = app()->make(TestService::class);
+        $answerDTO = new AnswerDTO(
+            $this->telegramUser->telegram_id,
+            $vocabularyId,
+            AnswerDTO::CORRECT_LESS_MIN_TIME
+        );
+        $this->telegramUser->vocabularies()->attach([
+            $vocabularyId => [
+                'review_date' => '2018-01-01',
+                'easiest_factor' => 2.900,
+                'continuing_correct_times' => 5,
+            ]
+        ]);
+        $testService->answer($answerDTO);
+        $this->assertDatabaseHas('telegram_user_vocabulary', [
+            'telegram_user_id' => $this->telegramUser->telegram_id,
+            'vocabulary_id' => $vocabularyId,
+            'review_date' => (new \DateTime('today + 615 day'))->format('Y-m-d'),
+            'easiest_factor' => 3.000,
+            'continuing_correct_times' => 6,
         ]);
     }
 
@@ -339,7 +391,7 @@ class TestServiceTest extends TestCase
             1 => [
                 'review_date' => '2018-01-01',
                 'easiest_factor' => 5.000,
-                'correct_times' => 10,
+                'continuing_correct_times' => 10,
             ]
         ]);
         $testService->answer($answerDTO);
@@ -348,7 +400,7 @@ class TestServiceTest extends TestCase
             'vocabulary_id' => 1,
             'review_date' => '2018-01-01',
             'easiest_factor' => 5.000,
-            'correct_times' => 10,
+            'continuing_correct_times' => 10,
         ]);
     }
 
@@ -365,7 +417,7 @@ class TestServiceTest extends TestCase
             1 => [
                 'review_date' => '2018-01-01',
                 'easiest_factor' => 5.000,
-                'correct_times' => 10,
+                'continuing_correct_times' => 10,
             ]
         ]);
         $testService->answer($answerDTO);
@@ -374,7 +426,7 @@ class TestServiceTest extends TestCase
             'vocabulary_id' => 1,
             'review_date' => '2018-01-01',
             'easiest_factor' => 5.000,
-            'correct_times' => 10,
+            'continuing_correct_times' => 10,
         ]);
     }
 }
