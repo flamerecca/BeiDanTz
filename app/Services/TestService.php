@@ -67,7 +67,7 @@ class TestService implements TestServiceInterface
 
         if ($vocabularies->isEmpty()) {
             return $this->vocabularyRepository
-                ->getByCriteria(new RandomCriteria(1))
+                ->pushCriteria(new RandomCriteria())
                 ->first();
         }
 
