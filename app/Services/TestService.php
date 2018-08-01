@@ -9,7 +9,6 @@
 namespace App\Services;
 
 use App\Criteria\LimitCriteria;
-use App\Criteria\RandomCriteria;
 use App\Criteria\NewVocabulariesCriteria;
 use App\Criteria\PastVocabulariesCriteria;
 use App\Criteria\TodayVocabulariesCriteria;
@@ -170,8 +169,6 @@ class TestService implements TestServiceInterface
 
     private function handleRightAnswer(AnswerDTO $answerDTO): void
     {
-
-
         $telegramUser = TelegramUser::find($answerDTO->getUserId());
         $originVocabulary = Vocabulary::find($answerDTO->getVocabularyId());
         $vocabulary = $telegramUser->vocabularies()
@@ -195,7 +192,6 @@ class TestService implements TestServiceInterface
         }
 
         $reviewDate = $this->getReviewDate(
-            $answerDTO,
             (string)$vocabulary->pivot->easiest_factor,
             (int)$vocabulary->pivot->correct_times
         );
@@ -212,7 +208,7 @@ class TestService implements TestServiceInterface
         ]);
     }
 
-    private function getReviewDate(AnswerDTO $answerDTO, string $easiestFactor, int $correctTimes): \DateTime
+    private function getReviewDate(string $easiestFactor, int $correctTimes): \DateTime
     {
         $interval = 3;
         for ($i = 0; $i < $correctTimes; $i++) {
