@@ -223,7 +223,7 @@ class TestServiceTest extends TestCase
             $vocabularyId,
             AnswerDTO::PASS
         );
-        $this->setFirstVocabulary($vocabularyId);
+        $this->attachVocabulary($vocabularyId);
         $this->testService->answer($answerDTO);
         $this->assertDatabaseHas('telegram_user_vocabulary', [
             'telegram_user_id' => $this->telegramUser->telegram_id,
@@ -234,7 +234,7 @@ class TestServiceTest extends TestCase
         ]);
     }
 
-    private function setFirstVocabulary(int $vocabularyId): void
+    private function attachVocabulary(int $vocabularyId): void
     {
         $this->telegramUser->vocabularies()->sync([
             $vocabularyId => [
@@ -253,7 +253,7 @@ class TestServiceTest extends TestCase
             $vocabularyId,
             AnswerDTO::WRONG_TWICE
         );
-        $this->setFirstVocabulary($vocabularyId);
+        $this->attachVocabulary($vocabularyId);
         $this->testService->answer($answerDTO);
         $this->assertDatabaseHas('telegram_user_vocabulary', [
             'telegram_user_id' => $this->telegramUser->telegram_id,
@@ -272,7 +272,7 @@ class TestServiceTest extends TestCase
             $vocabularyId,
             AnswerDTO::WRONG_ONCE
         );
-        $this->setFirstVocabulary($vocabularyId);
+        $this->attachVocabulary($vocabularyId);
         $this->testService->answer($answerDTO);
         $this->assertDatabaseHas('telegram_user_vocabulary', [
             'telegram_user_id' => $this->telegramUser->telegram_id,
@@ -291,19 +291,13 @@ class TestServiceTest extends TestCase
             $vocabularyId,
             AnswerDTO::CORRECT_OVER_MAX_TIME
         );
-        $this->telegramUser->vocabularies()->attach([
-            $vocabularyId => [
-                'review_date' => '2018-01-01',
-                'easiest_factor' => 2.900,
-                'continuing_correct_times' => 5,
-            ]
-        ]);
+        $this->attachVocabulary($vocabularyId);
         $this->testService->answer($answerDTO);
         $this->assertDatabaseHas('telegram_user_vocabulary', [
             'telegram_user_id' => $this->telegramUser->telegram_id,
             'vocabulary_id' => $vocabularyId,
-            'review_date' => (new \DateTime('today + 615 day'))->format('Y-m-d'),
-            'easiest_factor' => 2.760,
+            'review_date' => (new \DateTime('today + 729 day'))->format('Y-m-d'),
+            'easiest_factor' => 2.860,
             'continuing_correct_times' => 6,
         ]);
     }
@@ -316,19 +310,13 @@ class TestServiceTest extends TestCase
             $vocabularyId,
             AnswerDTO::CORRECT_BETWEEN_MIN_MAX_TIME
         );
-        $this->telegramUser->vocabularies()->attach([
-            $vocabularyId => [
-                'review_date' => '2018-01-01',
-                'easiest_factor' => 2.900,
-                'continuing_correct_times' => 5,
-            ]
-        ]);
+        $this->attachVocabulary($vocabularyId);
         $this->testService->answer($answerDTO);
         $this->assertDatabaseHas('telegram_user_vocabulary', [
             'telegram_user_id' => $this->telegramUser->telegram_id,
             'vocabulary_id' => $vocabularyId,
-            'review_date' => (new \DateTime('today + 615 day'))->format('Y-m-d'),
-            'easiest_factor' => 2.900,
+            'review_date' => (new \DateTime('today + 729 day'))->format('Y-m-d'),
+            'easiest_factor' => 3.000,
             'continuing_correct_times' => 6,
         ]);
     }
@@ -341,7 +329,7 @@ class TestServiceTest extends TestCase
             $vocabularyId,
             AnswerDTO::CORRECT_LESS_MIN_TIME
         );
-        $this->setFirstVocabulary($vocabularyId);
+        $this->attachVocabulary($vocabularyId);
         $this->testService->answer($answerDTO);
         $this->assertDatabaseHas('telegram_user_vocabulary', [
             'telegram_user_id' => $this->telegramUser->telegram_id,
@@ -361,7 +349,7 @@ class TestServiceTest extends TestCase
             $vocabularyId,
             AnswerDTO::PASS
         );
-        $this->setFirstVocabulary($originVocabularyId);
+        $this->attachVocabulary($originVocabularyId);
         $this->testService->answer($answerDTO);
         $this->assertDatabaseHas('telegram_user_vocabulary', [
             'telegram_user_id' => $this->telegramUser->telegram_id,
@@ -381,7 +369,7 @@ class TestServiceTest extends TestCase
             $vocabularyId,
             AnswerDTO::PASS
         );
-        $this->setFirstVocabulary($originVocabularyId);
+        $this->attachVocabulary($originVocabularyId);
         $this->testService->answer($answerDTO);
         $this->assertDatabaseHas('telegram_user_vocabulary', [
             'telegram_user_id' => $this->telegramUser->telegram_id,
