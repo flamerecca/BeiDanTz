@@ -14,7 +14,7 @@ use App\Entities\Vocabulary;
 use App\Repositories\VocabularyRepository;
 use Illuminate\Support\Collection;
 
-class WrongAnswerCriteriaTest extends TestCase
+class DifferentVocabularyCriteriaTest extends TestCase
 {
     protected function setUp()
     {
