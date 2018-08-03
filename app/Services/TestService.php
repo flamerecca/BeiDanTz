@@ -147,7 +147,7 @@ class TestService implements TestServiceInterface
                 'easiest_factor' => $this->easinessFactorService
                     ->calculateNewEasinessFactor(
                         $originEasiestFactor,
-                        $answerDTO->getAnsweringStatus()
+                        $answeringStatus
                     ),
                 'continuing_correct_times' => $continuingCorrectTimes,
             ]
