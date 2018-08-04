@@ -107,6 +107,44 @@ class TestServiceTest extends TestCase
         $this->assertEquals(4, count($question->getOptions()));
     }
 
+    public function testIfUserHasTodayVocabularyGetQuestionShouldReturnTodayVocabulary()
+    {
+        $vocabularyId = 2;
+        $this->telegramUser->vocabularies()->sync([
+            $vocabularyId => [
+                'review_date' =>  (new \DateTime('today'))->format('Y-m-d'),
+                'easiest_factor' => 3.000,
+                'continuing_correct_times' => 5,
+            ]
+        ]);
+        $question = $this->testService->getQuestion($this->telegramUser);
+        $this->assertEquals($question->getVocabularyId(), $vocabularyId);
+    }
+
+    public function testIfUserHasPreviousVocabularyGetQuestionShouldReturnPreviousVocabulary()
+    {
+        $vocabularyId = 2;
+        $todayVocabularyId = 4;
+        $this->telegramUser->vocabularies()->attach([
+            $vocabularyId => [
+                'review_date' =>  '1987-01-01',
+                'easiest_factor' => 3.000,
+                'continuing_correct_times' => 5,
+            ]
+        ]);
+
+        $this->telegramUser->vocabularies()->attach([
+            $todayVocabularyId => [
+                'review_date' =>  (new \DateTime('today'))->format('Y-m-d'),
+                'easiest_factor' => 3.000,
+                'continuing_correct_times' => 5,
+            ]
+        ]);
+
+        $question = $this->testService->getQuestion($this->telegramUser);
+        $this->assertEquals($question->getVocabularyId(), $vocabularyId);
+    }
+
     public function testAnswerFirstTimePass()
     {
         $vocabularyId = 3;
