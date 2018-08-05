@@ -119,7 +119,7 @@ class TestService implements TestServiceInterface
     public function answer(AnswerDTO $answerDTO): void
     {
         $answeringStatus = $answerDTO->getAnsweringStatus();
-        $telegramUser = TelegramUser::find($answerDTO->getUserId());
+        $telegramUser = TelegramUser::where('telegram_id', $answerDTO->getUserId())->first();
         $originVocabulary = Vocabulary::find($answerDTO->getVocabularyId());
         $vocabulary = $telegramUser->vocabularies()
             ->where('vocabulary_id', $answerDTO->getVocabularyId())
