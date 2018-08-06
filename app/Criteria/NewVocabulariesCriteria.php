@@ -26,16 +26,20 @@ class NewVocabulariesCriteria implements CriteriaInterface
     {
         $this->telegramUser = $telegramUser;
     }
+
     /**
      * Apply criteria in query repository
      *
-     * @param string              $model
+     * @param string $model
      * @param RepositoryInterface $repository
      *
      * @return mixed
      */
     public function apply($model, RepositoryInterface $repository)
     {
+        if ($model->doesntHave('telegramUsers')->get()->count() != 0) {
+            return $model->doesntHave('telegramUsers');
+        }
         return $model->with(['telegramUsers'])
             ->whereNotIn('telegram_user_id', [$this->telegramUser->id]);
     }

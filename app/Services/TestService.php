@@ -11,6 +11,7 @@ namespace App\Services;
 use App\Criteria\LimitCriteria;
 use App\Criteria\NewVocabulariesCriteria;
 use App\Criteria\PastVocabulariesCriteria;
+use App\Criteria\RandomCriteria;
 use App\Criteria\TodayVocabulariesCriteria;
 use App\Criteria\DifferentVocabularyCriteria;
 use App\DTO\AnswerDTO;
@@ -36,7 +37,8 @@ class TestService implements TestServiceInterface
         VocabularyRepository $vocabularyRepository,
         TelegramUserRepository $telegramUserRepository,
         EasinessFactorService $easinessFactorService
-    ) {
+    )
+    {
         $this->vocabularyRepository = $vocabularyRepository;
         $this->telegramUserRepository = $telegramUserRepository;
         $this->easinessFactorService = $easinessFactorService;
@@ -85,12 +87,11 @@ class TestService implements TestServiceInterface
             return $vocabularies->random();
         }
 
-        $vocabulary = $this->vocabularyRepository
+        return $this->vocabularyRepository
             ->pushCriteria(new NewVocabulariesCriteria($telegramUser))
+            ->pushCriteria(new RandomCriteria())
             ->first();
-
-        return $vocabulary;
-    }
+        }
 
     /**
      * @param Vocabulary $vocabulary
@@ -119,7 +120,7 @@ class TestService implements TestServiceInterface
     public function answer(AnswerDTO $answerDTO): void
     {
         $answeringStatus = $answerDTO->getAnsweringStatus();
-        $telegramUser = TelegramUser::find($answerDTO->getUserId());
+        $telegramUser = TelegramUser::where('telegram_id', $answerDTO->getUserId())->first();
         $originVocabulary = Vocabulary::find($answerDTO->getVocabularyId());
         $vocabulary = $telegramUser->vocabularies()
             ->where('vocabulary_id', $answerDTO->getVocabularyId())
