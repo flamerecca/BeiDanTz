@@ -15,42 +15,46 @@ use Mockery;
 
 class QuestionDTOTest extends TestCase
 {
-    public function testGetVocabularyShouldReturnVocabulary()
+    /**
+     * @var QuestionDTO
+     */
+    private $question;
+
+    protected function setUp()
     {
-        $question = new QuestionDTO(
-            Mockery::mock(Vocabulary::class),
-            [],
-            1
+        parent::setUp();
+        $this->question = new QuestionDTO(1, 'test', ['選項', '測驗'], 1);
+    }
+
+    public function testGetVocabularyIdShouldReturnInteger()
+    {
+        $this->assertInternalType(
+            'integer',
+            $this->question->getVocabularyId()
         );
-        $this->assertInstanceOf(
-            Vocabulary::class,
-            $question->getVocabulary()
+    }
+
+    public function testGetContentShouldReturnString()
+    {
+        $this->assertInternalType(
+            'string',
+            $this->question->getContent()
         );
     }
 
     public function testGetOptionsShouldReturnArray()
     {
-        $question = new QuestionDTO(
-            Mockery::mock(Vocabulary::class),
-            [],
-            1
-        );
         $this->assertInternalType(
             'array',
-            $question->getOptions()
+            $this->question->getOptions()
         );
     }
 
     public function testGetAnswerShouldReturnInteger()
     {
-        $question = new QuestionDTO(
-            Mockery::mock(Vocabulary::class),
-            [],
-            1
-        );
         $this->assertInternalType(
-            'integer',
-            $question->getAnswer()
+            'string',
+            $this->question->getAnswer()
         );
     }
 }

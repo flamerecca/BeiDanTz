@@ -7,16 +7,19 @@ use Prettus\Repository\Contracts\CriteriaInterface;
 use Prettus\Repository\Contracts\RepositoryInterface;
 
 /**
- * Class TodayVocabulariesCriteria.
+ * Class NewVocabulariesCriteria.
  *
  * @package namespace App\Criteria;
  */
-class TodayVocabulariesCriteria implements CriteriaInterface
+class NewVocabulariesCriteria implements CriteriaInterface
 {
+    /**
+     * @var TelegramUser
+     */
     private $telegramUser;
 
     /**
-     * TodayVocabulariesCriteria constructor.
+     * PastVocabulariesCriteria constructor.
      * @param TelegramUser $telegramUser
      */
     public function __construct(TelegramUser $telegramUser)
@@ -34,10 +37,10 @@ class TodayVocabulariesCriteria implements CriteriaInterface
      */
     public function apply($model, RepositoryInterface $repository)
     {
+        if ($model->doesntHave('telegramUsers')->get()->count() != 0) {
+            return $model->doesntHave('telegramUsers');
+        }
         return $model->with(['telegramUsers'])
-            ->whereHas('telegramUsers', function ($query) {
-                $query->where('telegram_user_id', $this->telegramUser->id)
-                ->where('review_date', date('Y-m-d'));
-            });
+            ->whereNotIn('telegram_user_id', [$this->telegramUser->id]);
     }
 }

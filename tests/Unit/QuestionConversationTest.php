@@ -6,16 +6,15 @@ use App\DTO\AnswerDTO;
 use App\DTO\QuestionDTO;
 use App\Entities\TelegramUser;
 use App\Entities\Vocabulary;
+use App\Http\Conversations\QuestionConversation;
 use App\Services\TestService;
 use App\Services\TestServiceInterface;
 use App\Services\UserService;
-use BotMan\BotMan\Messages\Incoming\Answer;
+use BotMan\BotMan\Messages\Incoming\IncomingMessage;
 use BotMan\BotMan\Messages\Outgoing\Actions\Button;
 use BotMan\BotMan\Messages\Outgoing\Question;
 use Mockery;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class QuestionConversationTest extends TestCase
 {
@@ -54,43 +53,40 @@ class QuestionConversationTest extends TestCase
         parent::setUp();
         $this->testServiceMock = Mockery::mock(TestServiceInterface::class);
         $userServiceStub = $this->createMock(UserService::class);
-        $user = new TelegramUser();
+        $user = new TelegramUser(['telegram_id' => 1]);
         $user->id = 1;
-        $user->telegram_id = 1;
         $userServiceStub->method('fistOrCreateUser')->willReturn($user);
         $this->app->instance(TestService::class, $this->testServiceMock);
         $this->app->instance(UserService::class, $userServiceStub);
 
-        $v1 = new Vocabulary([
-            'content' => 'test',
-            'answer' => '測試',
-            'easiest_factor' => 2.5,
-        ]);
-        $v1->id = 1;
-        $v2 = new Vocabulary([
-            'content' => 'question',
-            'answer' => '問題',
-            'easiest_factor' => 2.5,
-        ]);
-        $v2->id = 2;
-        $this->questionDTO1 = new QuestionDTO($v1, ['測試', '任務', '答案', '回應'], 0);
-        $this->questionDTO2 = new QuestionDTO($v2, ['任務', '問題', '答案', '回應'], 1);
+        $this->questionDTO1 = new QuestionDTO(
+            1,
+            'test',
+            ['測試', '任務', '答案', '回應'],
+            '測試'
+        );
+        $this->questionDTO2 = new QuestionDTO(
+            2,
+            'question',
+            ['任務', '問題', '答案', '回應'],
+            '問題'
+        );
 
         $this->questionTemplate1 = Question::create('test')
             ->addButtons([
-                Button::create('測試')->value(0),
-                Button::create('任務')->value(1),
-                Button::create('答案')->value(2),
-                Button::create('回應')->value(3),
+                Button::create('測試')->value('測試'),
+                Button::create('任務')->value('任務'),
+                Button::create('答案')->value('答案'),
+                Button::create('回應')->value('回應'),
                 Button::create('pass')->value('pass'),
             ]);
 
         $this->questionTemplate2 = Question::create('question')
             ->addButtons([
-                Button::create('任務')->value(0),
-                Button::create('問題')->value(1),
-                Button::create('答案')->value(2),
-                Button::create('回應')->value(3),
+                Button::create('任務')->value('任務'),
+                Button::create('問題')->value('問題'),
+                Button::create('答案')->value('答案'),
+                Button::create('回應')->value('回應'),
                 Button::create('pass')->value('pass'),
             ]);
 
@@ -137,7 +133,7 @@ class QuestionConversationTest extends TestCase
         $this->mockGetQuestionReturn([$this->questionDTO1, $this->questionDTO2]);
         $this->shouldReceiveAnswer(new AnswerDTO(
             $this->userId,
-            $this->questionDTO1->getVocabulary()->id,
+            $this->questionDTO1->getVocabularyId(),
             AnswerDTO::CORRECT_LESS_MIN_TIME
         ));
 
@@ -157,7 +153,7 @@ class QuestionConversationTest extends TestCase
         $this->mockGetQuestionReturn([$this->questionDTO1, $this->questionDTO2]);
         $this->shouldReceiveAnswer(new AnswerDTO(
             $this->userId,
-            $this->questionDTO1->getVocabulary()->id,
+            $this->questionDTO1->getVocabularyId(),
             AnswerDTO::CORRECT_BETWEEN_MIN_MAX_TIME
         ));
 
@@ -175,7 +171,7 @@ class QuestionConversationTest extends TestCase
         $this->mockGetQuestionReturn([$this->questionDTO1, $this->questionDTO2]);
         $this->shouldReceiveAnswer(new AnswerDTO(
             $this->userId,
-            $this->questionDTO1->getVocabulary()->id,
+            $this->questionDTO1->getVocabularyId(),
             AnswerDTO::CORRECT_OVER_MAX_TIME
         ));
 
@@ -193,17 +189,17 @@ class QuestionConversationTest extends TestCase
         $this->mockGetQuestionReturn([$this->questionDTO1, $this->questionDTO2]);
         $this->shouldReceiveAnswer(new AnswerDTO(
             $this->userId,
-            $this->questionDTO1->getVocabulary()->id,
+            $this->questionDTO1->getVocabularyId(),
             AnswerDTO::WRONG_ONCE
         ));
 
         $this->bot
             ->receives('開始複習')
             ->assertTemplate($this->questionTemplate1, true)
-            ->receivesInteractiveMessage($this->questionDTO1->getAnswer() + 1)
+            ->receivesInteractiveMessage('錯誤答案')
             ->assertReply('答錯惹')
-            ->assertTemplate($this->questionTemplate1, true)
-            ->receivesInteractiveMessage($this->questionDTO1->getAnswer())
+            ->assertTemplate($this->questionTemplate1, true);
+        $this->receivesInteractiveMessageWithPayload($this->questionDTO1->getAnswer(), ['message_id' => 2])
             ->assertReply('答對惹');
     }
 
@@ -215,17 +211,17 @@ class QuestionConversationTest extends TestCase
         $this->mockGetQuestionReturn([$this->questionDTO1, $this->questionDTO2]);
         $this->shouldReceiveAnswer(new AnswerDTO(
             $this->userId,
-            $this->questionDTO1->getVocabulary()->id,
+            $this->questionDTO1->getVocabularyId(),
             AnswerDTO::WRONG_TWICE
         ));
 
         $this->bot
             ->receives('開始複習')
             ->assertTemplate($this->questionTemplate1, true)
-            ->receivesInteractiveMessage($this->questionDTO1->getAnswer() + 1)
+            ->receivesInteractiveMessage('錯誤答案')
             ->assertReply('答錯惹')
-            ->assertTemplate($this->questionTemplate1, true)
-            ->receivesInteractiveMessage($this->questionDTO1->getAnswer() + 1)
+            ->assertTemplate($this->questionTemplate1, true);
+        $this->receivesInteractiveMessageWithPayload('錯誤答案', ['message_id' => 2])
             ->assertReply('答錯惹')
             ->assertTemplate($this->questionTemplate2, true);
     }
@@ -238,7 +234,7 @@ class QuestionConversationTest extends TestCase
         $this->mockGetQuestionReturn([$this->questionDTO1, $this->questionDTO2]);
         $this->shouldReceiveAnswer(new AnswerDTO(
             $this->userId,
-            $this->questionDTO1->getVocabulary()->id,
+            $this->questionDTO1->getVocabularyId(),
             AnswerDTO::PASS
         ));
 
@@ -248,5 +244,32 @@ class QuestionConversationTest extends TestCase
             ->receivesInteractiveMessage('pass')
             ->assertReply('跳過')
             ->assertTemplate($this->questionTemplate2, true);
+    }
+
+    /**
+     * @test
+     */
+    public function 測試當IncomingMessage有skip的時候，skipsConversation會回傳true()
+    {
+        $message = new IncomingMessage('', '', '');
+        $message->addExtras('skip', true);
+        $conversation = app()->make(QuestionConversation::class);
+
+        $actual = $conversation->skipsConversation($message);
+
+        $this->assertTrue($actual);
+    }
+
+    /**
+     * @test
+     */
+    public function 測試當IncomingMessage沒有skip的時候，skipsConversation會回傳false()
+    {
+        $message = new IncomingMessage('', '', '');
+        $conversation = app()->make(QuestionConversation::class);
+
+        $actual = $conversation->skipsConversation($message);
+
+        $this->assertFalse($actual);
     }
 }

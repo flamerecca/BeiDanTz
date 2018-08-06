@@ -30,6 +30,6 @@ class TelegramUser extends Model implements Transformable
     public function vocabularies()
     {
         return $this->belongsToMany(Vocabulary::class)
-            ->withPivot('review_date', 'easiest_factor');
+            ->withPivot('review_date', 'easiest_factor', 'continuing_correct_times');
     }
 }

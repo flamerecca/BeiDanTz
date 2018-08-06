@@ -7,18 +7,16 @@ use Prettus\Repository\Contracts\CriteriaInterface;
 use Prettus\Repository\Contracts\RepositoryInterface;
 
 /**
- * Class WrongAnswerCriteria.
+ * Class DifferentVocabularyCriteria.
  *
  * @package namespace App\Criteria;
  */
-class WrongAnswerCriteria implements CriteriaInterface
+class DifferentVocabularyCriteria implements CriteriaInterface
 {
     private $vocabulary;
-    private $number;
-    public function __construct(Vocabulary $vocabulary, int $number)
+    public function __construct(Vocabulary $vocabulary)
     {
         $this->vocabulary = $vocabulary;
-        $this->number = $number;
     }
 
     /**
@@ -31,9 +29,6 @@ class WrongAnswerCriteria implements CriteriaInterface
      */
     public function apply($model, RepositoryInterface $repository)
     {
-        $model = $model->where('id', '!=', $this->vocabulary->id)
-            ->inRandomOrder()
-            ->limit($this->number);
-        return $model;
+        return $model->where('id', '!=', $this->vocabulary->id);
     }
 }
