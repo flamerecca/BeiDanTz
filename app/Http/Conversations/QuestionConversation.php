@@ -50,9 +50,9 @@ class QuestionConversation extends Conversation
 
         $options = $this->question->getOptions();
         $buttons = collect($options)
-            ->map(function ($option, $idx) {
+            ->map(function ($option) {
                 // each button value must be difference, otherwise telegram can't display template
-                return Button::create($option)->value($idx);
+                return Button::create($option)->value($option);
             })
             ->push(Button::create('pass')->value('pass'))
             ->toArray();
