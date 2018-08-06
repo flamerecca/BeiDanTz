@@ -47,7 +47,7 @@ class NewVocabulariesCriteriaTest extends TestCase
         ]);
     }
 
-    public function testIfUserHadVocabulariesShouldSelectDifferentOne()
+    public function testIfVocabulariesWillBeReviewInFutureShouldNotBeSelect()
     {
         $vocabularyId = 1;
 
@@ -64,16 +64,16 @@ class NewVocabulariesCriteriaTest extends TestCase
             new NewVocabulariesCriteria($this->telegramUser)
         );
 
-        $this->assertNotContains($newVocabulary->first()->id, [$vocabularyId]);
+        $this->assertNotEquals($newVocabulary->first()->id, $vocabularyId);
     }
 
-    public function testIfUserDoesNotHadVocabulariesShouldSelectRandomOne()
+    public function testIfUserDoesNotHadReviewedVocabulariesShouldSelectNewVocabulary()
     {
         $repository = app()->make(VocabularyRepository::class);
         $newVocabulary = $repository->getByCriteria(
             new NewVocabulariesCriteria($this->telegramUser)
         );
-        $this->assertContains($newVocabulary->first()->id, [1, 2]);
+        $this->assertNotNull($newVocabulary->first());
     }
 
     public function testIfOtherUserVocabularyShouldNotAffectCurrentUserVocabulary()
