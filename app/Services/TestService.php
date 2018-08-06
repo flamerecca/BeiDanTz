@@ -87,15 +87,11 @@ class TestService implements TestServiceInterface
             return $vocabularies->random();
         }
 
-        $vocabularies = $this->vocabularyRepository
+        return $this->vocabularyRepository
             ->pushCriteria(new NewVocabulariesCriteria($telegramUser))
             ->pushCriteria(new RandomCriteria())
-            ->pushCriteria(new LimitCriteria(1))
-            ->all();
-
-
-        return collect($vocabularies)->first();
-    }
+            ->first();
+        }
 
     /**
      * @param Vocabulary $vocabulary
