@@ -63,30 +63,30 @@ class QuestionConversationTest extends TestCase
             1,
             'test',
             ['測試', '任務', '答案', '回應'],
-            0
+            '測試'
         );
         $this->questionDTO2 = new QuestionDTO(
             2,
             'question',
             ['任務', '問題', '答案', '回應'],
-            1
+            '問題'
         );
 
         $this->questionTemplate1 = Question::create('test')
             ->addButtons([
-                Button::create('測試')->value(0),
-                Button::create('任務')->value(1),
-                Button::create('答案')->value(2),
-                Button::create('回應')->value(3),
+                Button::create('測試')->value('測試'),
+                Button::create('任務')->value('任務'),
+                Button::create('答案')->value('答案'),
+                Button::create('回應')->value('回應'),
                 Button::create('pass')->value('pass'),
             ]);
 
         $this->questionTemplate2 = Question::create('question')
             ->addButtons([
-                Button::create('任務')->value(0),
-                Button::create('問題')->value(1),
-                Button::create('答案')->value(2),
-                Button::create('回應')->value(3),
+                Button::create('任務')->value('任務'),
+                Button::create('問題')->value('問題'),
+                Button::create('答案')->value('答案'),
+                Button::create('回應')->value('回應'),
                 Button::create('pass')->value('pass'),
             ]);
 
@@ -196,7 +196,7 @@ class QuestionConversationTest extends TestCase
         $this->bot
             ->receives('開始複習')
             ->assertTemplate($this->questionTemplate1, true)
-            ->receivesInteractiveMessage($this->questionDTO1->getAnswer() + 1)
+            ->receivesInteractiveMessage('錯誤答案')
             ->assertReply('答錯惹')
             ->assertTemplate($this->questionTemplate1, true);
         $this->receivesInteractiveMessageWithPayload($this->questionDTO1->getAnswer(), ['message_id' => 2])
@@ -218,10 +218,10 @@ class QuestionConversationTest extends TestCase
         $this->bot
             ->receives('開始複習')
             ->assertTemplate($this->questionTemplate1, true)
-            ->receivesInteractiveMessage($this->questionDTO1->getAnswer() + 1)
+            ->receivesInteractiveMessage('錯誤答案')
             ->assertReply('答錯惹')
             ->assertTemplate($this->questionTemplate1, true);
-        $this->receivesInteractiveMessageWithPayload($this->questionDTO1->getAnswer() + 1, ['message_id' => 2])
+        $this->receivesInteractiveMessageWithPayload('錯誤答案', ['message_id' => 2])
             ->assertReply('答錯惹')
             ->assertTemplate($this->questionTemplate2, true);
     }
