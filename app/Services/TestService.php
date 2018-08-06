@@ -11,6 +11,7 @@ namespace App\Services;
 use App\Criteria\LimitCriteria;
 use App\Criteria\NewVocabulariesCriteria;
 use App\Criteria\PastVocabulariesCriteria;
+use App\Criteria\RandomCriteria;
 use App\Criteria\TodayVocabulariesCriteria;
 use App\Criteria\DifferentVocabularyCriteria;
 use App\DTO\AnswerDTO;
@@ -36,7 +37,8 @@ class TestService implements TestServiceInterface
         VocabularyRepository $vocabularyRepository,
         TelegramUserRepository $telegramUserRepository,
         EasinessFactorService $easinessFactorService
-    ) {
+    )
+    {
         $this->vocabularyRepository = $vocabularyRepository;
         $this->telegramUserRepository = $telegramUserRepository;
         $this->easinessFactorService = $easinessFactorService;
@@ -85,11 +87,14 @@ class TestService implements TestServiceInterface
             return $vocabularies->random();
         }
 
-        $vocabulary = $this->vocabularyRepository
+        $vocabularies = $this->vocabularyRepository
             ->pushCriteria(new NewVocabulariesCriteria($telegramUser))
-            ->first();
+            ->pushCriteria(new RandomCriteria())
+            ->pushCriteria(new LimitCriteria(1))
+            ->all();
 
-        return $vocabulary;
+
+        return collect($vocabularies)->first();
     }
 
     /**
