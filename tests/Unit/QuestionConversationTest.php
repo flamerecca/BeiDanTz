@@ -223,6 +223,7 @@ class QuestionConversationTest extends TestCase
             ->assertTemplate($this->questionTemplate1, true);
         $this->receivesInteractiveMessageWithPayload('錯誤答案', ['message_id' => 2])
             ->assertReply('答錯惹')
+            ->assertReply('正確答案是：' . $this->questionDTO1->getAnswer())
             ->assertTemplate($this->questionTemplate2, true);
     }
 
@@ -243,6 +244,7 @@ class QuestionConversationTest extends TestCase
             ->assertTemplate($this->questionTemplate1, true)
             ->receivesInteractiveMessage('pass')
             ->assertReply('跳過')
+            ->assertReply('正確答案是：' . $this->questionDTO1->getAnswer())
             ->assertTemplate($this->questionTemplate2, true);
     }
 

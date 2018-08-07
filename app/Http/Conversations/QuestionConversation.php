@@ -78,6 +78,7 @@ class QuestionConversation extends Conversation
 
                 $toNextQuestion = $correct || $this->wrongTimes > $this->maxWrongTimes || $pass;
                 if ($toNextQuestion) {
+                    if (!$correct) $this->say('正確答案是：' . $this->question->getAnswer());
                     $this->nextQuestion($pass, $answerTime);
                 } else {
                     $this->askQuestion();
