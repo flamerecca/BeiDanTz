@@ -21,6 +21,11 @@ use App\Entities\Vocabulary;
 use App\Repositories\TelegramUserRepository;
 use App\Repositories\VocabularyRepository;
 
+/**
+ * 處理題目的 service
+ * Class TestService
+ * @package App\Services
+ */
 class TestService implements TestServiceInterface
 {
     private $vocabularyRepository;
@@ -37,8 +42,7 @@ class TestService implements TestServiceInterface
         VocabularyRepository $vocabularyRepository,
         TelegramUserRepository $telegramUserRepository,
         EasinessFactorService $easinessFactorService
-    )
-    {
+    ) {
         $this->vocabularyRepository = $vocabularyRepository;
         $this->telegramUserRepository = $telegramUserRepository;
         $this->easinessFactorService = $easinessFactorService;
@@ -91,7 +95,7 @@ class TestService implements TestServiceInterface
             ->pushCriteria(new NewVocabulariesCriteria($telegramUser))
             ->pushCriteria(new RandomCriteria())
             ->first();
-        }
+    }
 
     /**
      * @param Vocabulary $vocabulary
@@ -126,12 +130,35 @@ class TestService implements TestServiceInterface
             ->where('vocabulary_id', $answerDTO->getVocabularyId())
             ->first();
 
+        $continuingCorrectTimes = $this->getContinuingCorrectTimes($vocabulary, $answeringStatus);
+        $originEasiestFactor = $this->getOriginEasiestFactor($vocabulary, $originVocabulary);
+
+        $reviewDate = $this->getReviewDate($originEasiestFactor, $continuingCorrectTimes);
+        $newEasinessFactor = $this->easinessFactorService->calculateNewEasinessFactor(
+            $originEasiestFactor,
+            $answeringStatus
+        );
+
+        $telegramUser->vocabularies()->syncWithoutDetaching([
+            $answerDTO->getVocabularyId() => [
+                'review_date' => $reviewDate->format('Y-m-d'),
+                'easiest_factor' => $newEasinessFactor,
+                'continuing_correct_times' => $continuingCorrectTimes,
+            ]
+        ]);
+    }
+
+    /**
+     * @param Vocabulary|null $vocabulary
+     * @param int $answeringStatus
+     * @return int
+     */
+    private function getContinuingCorrectTimes(?Vocabulary $vocabulary, int $answeringStatus): int
+    {
         if (is_null($vocabulary)) {
             $continuingCorrectTimes = 0;
-            $originEasiestFactor = $originVocabulary->easiest_factor;
         } else {
             $continuingCorrectTimes = $vocabulary->pivot->continuing_correct_times;
-            $originEasiestFactor = $vocabulary->pivot->easiest_factor;
         }
 
         if ($this->isRightAnswer($answeringStatus)) {
@@ -140,19 +167,21 @@ class TestService implements TestServiceInterface
             $continuingCorrectTimes = 0;
         }
 
-        $reviewDate = $this->getReviewDate($originEasiestFactor, $continuingCorrectTimes);
+        return $continuingCorrectTimes;
+    }
 
-        $telegramUser->vocabularies()->syncWithoutDetaching([
-            $answerDTO->getVocabularyId() => [
-                'review_date' => $reviewDate->format('Y-m-d'),
-                'easiest_factor' => $this->easinessFactorService
-                    ->calculateNewEasinessFactor(
-                        $originEasiestFactor,
-                        $answeringStatus
-                    ),
-                'continuing_correct_times' => $continuingCorrectTimes,
-            ]
-        ]);
+    /**
+     * @param Vocabulary|null $vocabulary
+     * @param Vocabulary $originVocabulary
+     * @return string
+     */
+    private function getOriginEasiestFactor(?Vocabulary $vocabulary, Vocabulary $originVocabulary): string
+    {
+        if (is_null($vocabulary)) {
+            return $originVocabulary->easiest_factor;
+        } else {
+            return $vocabulary->pivot->easiest_factor;
+        }
     }
 
     /**
