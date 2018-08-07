@@ -42,8 +42,7 @@ class TestService implements TestServiceInterface
         VocabularyRepository $vocabularyRepository,
         TelegramUserRepository $telegramUserRepository,
         EasinessFactorService $easinessFactorService
-    )
-    {
+    ) {
         $this->vocabularyRepository = $vocabularyRepository;
         $this->telegramUserRepository = $telegramUserRepository;
         $this->easinessFactorService = $easinessFactorService;
@@ -154,7 +153,7 @@ class TestService implements TestServiceInterface
      * @param int $answeringStatus
      * @return int
      */
-    private function getContinuingCorrectTimes(Vocabulary $vocabulary = null, int $answeringStatus): int
+    private function getContinuingCorrectTimes(?Vocabulary $vocabulary, int $answeringStatus): int
     {
         if (is_null($vocabulary)) {
             $continuingCorrectTimes = 0;
@@ -176,7 +175,7 @@ class TestService implements TestServiceInterface
      * @param Vocabulary $originVocabulary
      * @return string
      */
-    private function getOriginEasiestFactor(Vocabulary $vocabulary = null, Vocabulary $originVocabulary): string
+    private function getOriginEasiestFactor(?Vocabulary $vocabulary, Vocabulary $originVocabulary): string
     {
         if (is_null($vocabulary)) {
             return $originVocabulary->easiest_factor;
