@@ -106,6 +106,7 @@ class TestService implements TestServiceInterface
     {
         $wrongAnswer = $this->vocabularyRepository
             ->pushCriteria(new DifferentVocabularyCriteria($vocabulary))
+            ->pushCriteria(new RandomCriteria())
             ->pushCriteria(new LimitCriteria($optionNumber - 1))
             ->all();
 
