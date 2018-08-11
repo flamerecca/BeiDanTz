@@ -9,6 +9,7 @@
 namespace Tests\Unit;
 
 use App\Criteria\LimitCriteria;
+use App\Criteria\RandomCriteria;
 use App\Criteria\TodayVocabulariesCriteria;
 use App\Criteria\DifferentVocabularyCriteria;
 use App\DTO\AnswerDTO;
@@ -88,8 +89,10 @@ class TestServiceTest extends TestCase
 
         $mock->method('pushCriteria')->withConsecutive(
             $this->isInstanceOf(DifferentVocabularyCriteria::class),
+            $this->isInstanceOf(RandomCriteria::class),
             $this->isInstanceOf(LimitCriteria::class)
         )->will($this->onConsecutiveCalls(
+            $mock,
             $mock,
             $wrongAnswers
         ));
