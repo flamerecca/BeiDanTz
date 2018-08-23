@@ -29,3 +29,25 @@ jobs: # a collection of steps
       - run: ./vendor/bin/phpunit --coverage-clover=coverage.xml
       - run: bash <(curl -s https://codecov.io/bash)
       # See https://circleci.com/docs/2.0/deployment-integrations/ for deploy examples
+  deploy:
+    docker:
+      - image: reccachao/beidantz:0.0.1
+    working_directory: ~/code/BeiDanTz # directory where steps will run
+    steps:
+      - run:
+          name: Install awscli
+          command: sudo pip install awscli
+      - run:
+          name: Deploy to S3
+          command: aws s3 sync . s3://circleci-codeploy --delete
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
