@@ -42,6 +42,9 @@ jobs: # a collection of steps
           name: test s3 list
           command: aws s3 ls
       - run:
+          name: check current dir
+          command: pwd
+      - run:
           name: Deploy to S3 if tests pass and branch is Master
           command: aws s3 sync ~/code/BeiDanTz s3://beidantz-codedeploy/BeiDanTz --delete
 workflows:
