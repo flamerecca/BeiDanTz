@@ -42,7 +42,7 @@ jobs: # a collection of steps
           name: check s3 bucket
           command: aws s3 ls
       - run:
-          name: check currect dir
+          name: check current dir
           command: pwd
       - run:
           name: Deploy to S3 if tests pass and branch is Master
