@@ -31,9 +31,10 @@ jobs: # a collection of steps
       # See https://circleci.com/docs/2.0/deployment-integrations/ for deploy examples
   deploy:
     docker:
-      - image: reccachao/beidantz:0.0.1
-    working_directory: ~/code/BeiDanTz # directory where steps will run
+      - image: cibuilds/aws:1.15.73
     steps:
+      - attach_workspace:
+          at: ~/code/BeiDanTz
       - run:
           name: Install awscli
           command: sudo pip install awscli
@@ -44,7 +45,7 @@ jobs: # a collection of steps
           name: check currect dir
           command: pwd
       - run:
-          name: Deploy to S3
+          name: Deploy to S3 if tests pass and branch is Master
           command: aws s3 sync . s3://beidantz-codedeploy --delete
 workflows:
   version: 2
