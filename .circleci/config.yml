@@ -32,9 +32,8 @@ jobs: # a collection of steps
   deploy:
     docker:
       - image: reccachao/beidantz:0.0.1
+    working_directory: ~/code/BeiDanTz
     steps:
-      - attach_workspace:
-          at: ~/code/BeiDanTz
       - run:
           name: Install awscli
           command: sudo pip install awscli
@@ -44,6 +43,9 @@ jobs: # a collection of steps
       - run:
           name: check current dir
           command: pwd
+      - run:
+          name: list file
+          command: ls -al
       - run:
           name: Deploy to S3 if tests pass and branch is Master
           command: aws s3 sync /root/project s3://beidantz-codedeploy/BeiDanTz --delete
