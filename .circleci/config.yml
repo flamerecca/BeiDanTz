@@ -51,7 +51,7 @@ jobs: # a collection of steps
           command: pwd
       - run:
           name: list file
-          command: ls -al generated-site/code
+          command: ls -al generated-site
       - run:
           name: Deploy to S3 if tests pass and branch is Master
           command: aws s3 sync generated-site s3://beidantz-codedeploy/BeiDanTz --delete
