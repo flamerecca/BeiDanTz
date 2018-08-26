@@ -32,7 +32,22 @@ jobs: # a collection of steps
       - persist_to_workspace:
           root: .
           paths:
-            - .
+            - ./app
+            - ./bootstrap
+            - ./config
+            - ./database
+            - ./public
+            - ./resources
+            - ./routes
+            - ./storage
+            - ./.env
+            - ./artisan
+            - ./composer.json
+            - ./composer.lock
+            - ./package.json
+            - ./server.php
+            - ./webpack.mix.js
+            - ./yarn.lock
       # See https://circleci.com/docs/2.0/deployment-integrations/ for deploy examples
   deploy:
     docker:
@@ -43,15 +58,6 @@ jobs: # a collection of steps
       - run:
           name: Install awscli
           command: sudo pip install awscli
-      - run:
-          name: check s3 bucket
-          command: aws s3 ls
-      - run:
-          name: check current dir
-          command: pwd
-      - run:
-          name: list file
-          command: ls -al generated-site
       - run:
           name: Deploy to S3 if tests pass and branch is Master
           command: aws s3 sync generated-site s3://beidantz-codedeploy/BeiDanTz --delete
