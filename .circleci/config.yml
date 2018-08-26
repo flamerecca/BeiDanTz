@@ -28,12 +28,18 @@ jobs: # a collection of steps
           command: ./vendor/bin/phpcs --standard=psr2 app
       - run: ./vendor/bin/phpunit --coverage-clover=coverage.xml
       - run: bash <(curl -s https://codecov.io/bash)
+      - run: ls -al
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
       # See https://circleci.com/docs/2.0/deployment-integrations/ for deploy examples
   deploy:
     docker:
       - image: reccachao/beidantz:0.0.1
-    working_directory: ~/code/BeiDanTz
     steps:
+      - attach_workspace:
+          at: ./generated-site
       - run:
           name: Install awscli
           command: sudo pip install awscli
@@ -45,10 +51,10 @@ jobs: # a collection of steps
           command: pwd
       - run:
           name: list file
-          command: ls -al
+          command: ls -al generated-site
       - run:
           name: Deploy to S3 if tests pass and branch is Master
-          command: aws s3 sync /root/project s3://beidantz-codedeploy/BeiDanTz --delete
+          command: aws s3 sync generated-site s3://beidantz-codedeploy/BeiDanTz --delete
 workflows:
   version: 2
   build-deploy:
