@@ -36,10 +36,12 @@ jobs: # a collection of steps
             - ./bootstrap
             - ./config
             - ./database
+            - ./node_modules
             - ./public
             - ./resources
             - ./routes
             - ./storage
+            - ./vendor
             - ./.env
             - ./artisan
             - ./composer.json
@@ -70,5 +72,7 @@ workflows:
           requires:
             - build
           filters:
+            tags:
+              only: /^v.*/
             branches:
               only: master
